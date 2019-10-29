@@ -1,9 +1,9 @@
-package com.alexsci.android.lambdarunner.ui.login
+package com.alexsci.android.lambdarunner.ui.add_key
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.alexsci.android.lambdarunner.data.LoginDataSource
-import com.alexsci.android.lambdarunner.data.LoginRepository
+import com.alexsci.android.lambdarunner.data.add_key.LoginDataSource
+import com.alexsci.android.lambdarunner.data.add_key.LoginRepository
 
 /**
  * ViewModel provider factory to instantiate LoginViewModel.

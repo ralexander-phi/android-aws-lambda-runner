@@ -1,6 +1,7 @@
-package com.alexsci.android.lambdarunner.data
+package com.alexsci.android.lambdarunner.data.add_key
 
-import com.alexsci.android.lambdarunner.data.model.LoggedInUser
+import com.alexsci.android.lambdarunner.data.Result
+import com.alexsci.android.lambdarunner.data.add_key.model.LoggedInUser
 
 /**
  * Class that requests authentication and user information from the remote data source and

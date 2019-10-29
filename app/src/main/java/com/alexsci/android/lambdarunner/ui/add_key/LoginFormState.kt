@@ -1,4 +1,4 @@
-package com.alexsci.android.lambdarunner.ui.login
+package com.alexsci.android.lambdarunner.ui.add_key
 
 /**
  * Data validation state of the login form.

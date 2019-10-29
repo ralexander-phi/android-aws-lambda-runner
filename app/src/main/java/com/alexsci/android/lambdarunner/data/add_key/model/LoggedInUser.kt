@@ -1,4 +1,4 @@
-package com.alexsci.android.lambdarunner.data.model
+package com.alexsci.android.lambdarunner.data.add_key.model
 
 /**
  * Data class that captures user information for logged in users retrieved from LoginRepository

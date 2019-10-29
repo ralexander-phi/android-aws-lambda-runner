@@ -1,4 +1,4 @@
-package com.alexsci.android.lambdarunner.ui.login
+package com.alexsci.android.lambdarunner.ui.add_key
 
 /**
  * User details post authentication that is exposed to the UI

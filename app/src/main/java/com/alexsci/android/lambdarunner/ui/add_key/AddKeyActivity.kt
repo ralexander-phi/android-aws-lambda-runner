@@ -1,7 +1,7 @@
-package com.alexsci.android.lambdarunner.ui.login
+package com.alexsci.android.lambdarunner.ui.add_key
 
 import android.app.Activity
-import android.content.Context
+import android.os.AsyncTask
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
@@ -9,7 +9,6 @@ import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.Button
@@ -18,66 +17,61 @@ import android.widget.ProgressBar
 import android.widget.Toast
 
 import com.alexsci.android.lambdarunner.R
-import com.alexsci.android.lambdarunner.aws.BetterAWSLambdaClient
-import com.alexsci.android.lambdarunner.aws.ListFunctionsRequest
+import com.alexsci.android.lambdarunner.aws.iam.IamClient
 import com.alexsci.android.lambdarunner.util.crypto.*
-import com.amazonaws.ClientConfiguration
 import com.amazonaws.auth.BasicAWSCredentials
-import com.amazonaws.regions.Region
-import java.lang.RuntimeException
+import com.amazonaws.internal.StaticCredentialsProvider
 
-class LoginActivity : AppCompatActivity() {
+data class SaveKeyTaskParams(val accessKey: String, val secretKey: String)
+
+class SaveKeyTask(val activity: AddKeyActivity) : AsyncTask<SaveKeyTaskParams, Void, String>() {
+    override fun doInBackground(vararg params: SaveKeyTaskParams?): String {
+        assert(params != null)
+        assert(params.size == 1)
+
+        val accessKey = params[0]?.accessKey
+        val secretKey = params[0]?.secretKey
+
+        val keyManagement = KeyManagement.getInstance(activity)
+        val creds = BasicAWSCredentials(accessKey, secretKey)
+        val credProvider = StaticCredentialsProvider(creds)
+
+        val iamClient = IamClient(credProvider)
+        val user = iamClient.getUser()
+
+        keyManagement.addKey(accessKey, user.user.userName, secretKey)
+
+        return user.user.userName
+    }
+
+    override fun onPostExecute(result: String) {
+        super.onPostExecute(result)
+
+        activity.onSuccessfulSave(result)
+    }
+}
+
+
+class AddKeyActivity : AppCompatActivity() {
 
     private lateinit var loginViewModel: LoginViewModel
-
-    class HackThread(val context: Context, val keyName: String) : Thread() {
-        var functions: String? = null
-
-        override fun run() {
-            val thread = GetKeysThread(context, keyName)
-            thread.run()
-            if (thread.keySecret == null) {
-                throw RuntimeException("Ooops")
-            }
-
-            val creds = BasicAWSCredentials(keyName, thread.keySecret)
-
-            val client = BetterAWSLambdaClient(creds)
-            client.setRegion(Region.getRegion("us-east-1"))
-
-            val res = client.listFunctions(ListFunctionsRequest(""))
-            functions = res.functions.toString()
-        }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val listKeyTh = ListKeysThread(this)
-        // uhh...
-        listKeyTh.start()
-        listKeyTh.join()
-
-        val existingKeys = listKeyTh.keys
-
-        if (! existingKeys.isNullOrEmpty()) {
-            val doTh = HackThread(this, existingKeys.first())
-            doTh.start()
-            doTh.join()
-            Log.i("RAA = DONE", doTh.functions)
-        }
-
-        setContentView(R.layout.activity_login)
+        setContentView(R.layout.activity_add_key)
 
         val accessKeyId = findViewById<EditText>(R.id.access_key_id)
         val secretAccessKey = findViewById<EditText>(R.id.secret_access_key)
         val login = findViewById<Button>(R.id.login)
         val loading = findViewById<ProgressBar>(R.id.loading)
 
-        loginViewModel = ViewModelProviders.of(this, LoginViewModelFactory())
+        loginViewModel = ViewModelProviders.of(this,
+            LoginViewModelFactory()
+        )
             .get(LoginViewModel::class.java)
 
-        loginViewModel.loginFormState.observe(this@LoginActivity, Observer {
+        loginViewModel.loginFormState.observe(this@AddKeyActivity, Observer {
             val loginState = it ?: return@Observer
 
             // disable login button unless both username / password is valid
@@ -91,7 +85,7 @@ class LoginActivity : AppCompatActivity() {
             }
         })
 
-        loginViewModel.loginResult.observe(this@LoginActivity, Observer {
+        loginViewModel.loginResult.observe(this@AddKeyActivity, Observer {
             val loginResult = it ?: return@Observer
 
             loading.visibility = View.GONE
@@ -100,19 +94,14 @@ class LoginActivity : AppCompatActivity() {
             }
             if (loginResult.success != null) {
                 //updateUiWithUser(loginResult.success)
-                val addTh = AddKeyThread(this, accessKeyId.text.toString(), "Something", secretAccessKey.text.toString())
-                addTh.start()
-                addTh.join()
 
-                val doTh = HackThread(this, accessKeyId.text.toString())
-                doTh.start()
-                doTh.join()
-                Log.i("RAA = DONE", doTh.functions)
+                val params = SaveKeyTaskParams(
+                    accessKeyId.text.toString(),
+                    secretAccessKey.text.toString()
+                )
+
+                SaveKeyTask(this).execute(params)
             }
-            setResult(Activity.RESULT_OK)
-
-            //Complete and destroy login activity once successful
-            finish()
         })
 
         accessKeyId.afterTextChanged {
@@ -148,15 +137,13 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-    private fun updateUiWithUser(model: LoggedInUserView) {
-        val welcome = getString(R.string.welcome)
-        val displayName = model.displayName
-        // TODO : initiate successful logged in experience
-        Toast.makeText(
-            applicationContext,
-            "$welcome $displayName",
-            Toast.LENGTH_LONG
-        ).show()
+    fun onSuccessfulSave(username: String) {
+        Toast.makeText(applicationContext, "Successfully added $username", Toast.LENGTH_LONG).show()
+
+        setResult(Activity.RESULT_OK)
+
+        //Complete and destroy login activity once successful
+        finish()
     }
 
     private fun showLoginFailed(@StringRes errorString: Int) {
