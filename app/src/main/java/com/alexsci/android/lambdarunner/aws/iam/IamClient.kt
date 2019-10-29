@@ -1,39 +1,41 @@
 package com.alexsci.android.lambdarunner.aws.iam
 
 import android.util.Log
-import com.alexsci.android.lambdarunner.aws.base.AWSCommonRequestParameters
-import com.alexsci.android.lambdarunner.aws.base.BaseClient
-import com.alexsci.android.lambdarunner.aws.base.BaseResponseHandler
-import com.alexsci.android.lambdarunner.aws.base.SimpleErrorHandler
+import com.alexsci.android.lambdarunner.aws.base.*
 import com.amazonaws.AmazonWebServiceResponse
 import com.amazonaws.ClientConfiguration
 import com.amazonaws.DefaultRequest
 import com.amazonaws.ResponseMetadata
 import com.amazonaws.auth.AWSCredentialsProvider
 import com.amazonaws.http.*
+import com.amazonaws.regions.Region
 import com.google.api.client.util.DateTime
 import com.google.gson.JsonParser
 import java.lang.RuntimeException
 import java.net.URI
 
-class IamClient(credProvider: AWSCredentialsProvider) : BaseClient(credProvider, "iam") {
+class IamClient(credProvider: AWSCredentialsProvider):
+        BaseClient(
+            credProvider,
+            "iam",
+            Region.getRegion("us-east-1")
+        ) {
 
     /*
       See https://docs.aws.amazon.com/IAM/latest/APIReference/API_GetUser.html
      */
     fun getUser(getUserRequest: GetUserRequest? = null) : GetUserResult {
-        val getUserRequestActual = getUserRequest ?: GetUserRequest()
+        val getUserRequest = getUserRequest ?: GetUserRequest()
 
         val request = DefaultRequest<Void>("iam")
         request.httpMethod = HttpMethodName.GET
         // global endpoint
         request.endpoint = URI.create("https://iam.amazonaws.com")
 
-        if (getUserRequestActual.username != null) {
-            request.addParameter("UserName", getUserRequestActual.username)
-        }
+        request.addParameter("Action", getUserRequest.action)
+        request.addParameter("Version", getUserRequest.version)
+        request.addParameterIfNonNull("UserName", getUserRequest.username)
 
-        addBaseParameters(getUserRequestActual, request)
         sign(request)
 
         val response = AmazonHttpClient(ClientConfiguration())

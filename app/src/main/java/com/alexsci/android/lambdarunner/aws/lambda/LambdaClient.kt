@@ -1,9 +1,6 @@
 package com.alexsci.android.lambdarunner.aws.lambda
 
-import android.util.Log
-import com.alexsci.android.lambdarunner.aws.base.BaseClient
-import com.alexsci.android.lambdarunner.aws.base.BaseResponseHandler
-import com.alexsci.android.lambdarunner.aws.base.SimpleErrorHandler
+import com.alexsci.android.lambdarunner.aws.base.*
 import com.amazonaws.AmazonWebServiceResponse
 import com.amazonaws.ClientConfiguration
 import com.amazonaws.DefaultRequest
@@ -12,15 +9,25 @@ import com.amazonaws.http.AmazonHttpClient
 import com.amazonaws.http.ExecutionContext
 import com.amazonaws.http.HttpMethodName
 import com.amazonaws.http.HttpResponse
+import com.amazonaws.regions.Region
 import com.google.gson.JsonParser
 import java.net.URI
+import java.nio.charset.Charset
 
-class LambdaClient(credProvider: AWSCredentialsProvider, region: String = "us-east-1") :
+class LambdaClient(
+    _credProvider: AWSCredentialsProvider,
+    _region: Region = Region.getRegion("us-east-1")
+):
         BaseClient(
-            credProvider,
+            _credProvider,
             "lambda",
-            region
+            _region
         ) {
+
+    private fun selectEndpoint(region: Region, path: String): URI? {
+        assert(path.startsWith("/"))
+        return URI.create("https://" + region.getServiceEndpoint("lambda") + path)
+    }
 
     /*
       See: https://docs.aws.amazon.com/lambda/latest/dg/API_ListFunctions.html
@@ -28,20 +35,12 @@ class LambdaClient(credProvider: AWSCredentialsProvider, region: String = "us-ea
     fun list(listRequest: ListFunctionsRequest) : ListFunctionsResult {
         val request = DefaultRequest<Void>("lambda")
         request.httpMethod = HttpMethodName.GET
-        // global endpoint
-        request.endpoint = URI.create("https://lambda.us-east-1.amazonaws.com/2015-03-31/functions/")
+        request.endpoint = selectEndpoint(region, "/2015-03-31/functions/")
 
         request.addParameter("FunctionVersion", listRequest.functionVersion)
-
-        if (listRequest.marker != null) {
-            request.addParameter("Marker", listRequest.marker)
-        }
-        if (listRequest.masterRegion != null) {
-            request.addParameter("MasterRegion", listRequest.masterRegion)
-        }
-        if (listRequest.maxItems != null) {
-            request.addParameter("MaxItems", listRequest.maxItems.toString())
-        }
+        request.addParameterIfNonNull("Marker", listRequest.marker)
+        request.addParameterIfNonNull("MasterRegion", listRequest.masterRegion)
+        request.addParameterIfNonNull("MaxItems", listRequest.maxItems?.toString())
 
         sign(request)
 
@@ -52,6 +51,67 @@ class LambdaClient(credProvider: AWSCredentialsProvider, region: String = "us-ea
             )
 
         return response.awsResponse
+    }
+
+    fun invoke(invokeRequest: InvokeFunctionRequest) : InvokeFunctionResult {
+        val request = DefaultRequest<Void>("lambda")
+        request.httpMethod = HttpMethodName.POST
+        request.endpoint = selectEndpoint(
+            region,
+            "/2015-03-31/functions/${invokeRequest.functionName}/invocations"
+        )
+
+        request.addParameterIfNonNull("Qualifier", invokeRequest.qualifier)
+        request.addHeaderIfNonNull("X-Amz-Invocation-Type", invokeRequest.invocationType)
+        request.addHeaderIfNonNull("X-Amz-Log-Type", invokeRequest.logType)
+        request.addHeaderIfNonNull("X-Amz-Client-Context", invokeRequest.clientContext)
+
+        val payloadStream = invokeRequest.payload.toByteArray(Charsets.UTF_8)
+        request.content = payloadStream.inputStream()
+        request.addHeader("Content-Length", payloadStream.size.toString())
+
+        sign(request)
+
+        val response = AmazonHttpClient(ClientConfiguration())
+            .execute(
+                request,
+                InvokeFunctionsResponseHandler(),
+                SimpleErrorHandler(),
+                ExecutionContext()
+            )
+
+        return response.awsResponse
+    }
+}
+
+class InvokeFunctionRequest(
+    val functionName: String,
+    val payload: String,
+    val invocationType: String? = null,
+    val logType: String? = null,
+    val qualifier: String? = null,
+    val clientContext: String? = null
+)
+
+class InvokeFunctionResult(
+    var executedVersion: String,
+    var payload: String,
+    var functionError: String? = null,
+    var logResult: String? = null
+)
+
+class InvokeFunctionsResponseHandler : BaseResponseHandler<AmazonWebServiceResponse<InvokeFunctionResult>>() {
+    override fun doHandle(response: HttpResponse): AmazonWebServiceResponse<InvokeFunctionResult> {
+        if (responseContent == null) { throw RuntimeException("Null response content, no json") }
+
+        return AmazonWebServiceResponse<InvokeFunctionResult>().apply {
+            result = InvokeFunctionResult(
+                executedVersion = response.headers["X-Amz-Executed-Version"]!!,
+                payload = responseContent!!,
+                functionError = response.headers["X-Amz-Fuction-Error"],
+                logResult = response.headers["X-Amz-Log-Result"]
+            )
+        }
     }
 }
 

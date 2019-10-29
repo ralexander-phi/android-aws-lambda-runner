@@ -7,27 +7,36 @@ import com.amazonaws.auth.AWS4Signer
 import com.amazonaws.auth.AWSCredentialsProvider
 import com.amazonaws.http.HttpResponse
 import com.amazonaws.http.HttpResponseHandler
+import com.amazonaws.regions.Region
 import java.io.BufferedReader
 import java.lang.RuntimeException
 
 open class BaseClient(
-    val credentialsProvider: AWSCredentialsProvider,
-    val serviceName: String,
-    val region: String = "us-east-1"
+    private val credentialsProvider: AWSCredentialsProvider,
+    private val serviceName: String,
+    var region: Region
 ) {
-
-    protected fun <T> addBaseParameters(params: AWSCommonRequestParameters, request: Request<T>) {
-        request.addParameter("Action", params.action)
-        request.addParameter("Version", params.version)
-    }
-
     protected fun <T> sign(request: Request<T>) {
         val signer = AWS4Signer()
-        signer.setRegionName(region)
+        signer.setRegionName(region.name)
         signer.setServiceName(serviceName)
         signer.sign(request, credentialsProvider.credentials)
     }
 }
+
+fun <T> Request<T>.addHeaderIfNonNull(name: String, value: String?) {
+    if (value != null) {
+        addHeader(name, value)
+    }
+}
+
+fun <T> Request<T>.addParameterIfNonNull(name: String, value: String?) {
+    if (value != null) {
+        addParameter(name, value)
+    }
+}
+
+
 
 abstract class BaseResponseHandler<T> : HttpResponseHandler<T> {
     var responseContent: String? = null
