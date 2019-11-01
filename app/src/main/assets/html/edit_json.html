@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>CSS Integration JSON Editor Example</title>
+
+    <!-- Foundation CSS framework (Bootstrap and jQueryUI also supported) -->
+    <link rel='stylesheet' href='https://cdn.jsdelivr.net/foundation/5.0.2/css/foundation.min.css'>
+    <!-- Font Awesome icons (Bootstrap, Foundation, and jQueryUI also supported) -->
+    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.3/css/font-awesome.css'>
+
+    <script src="https://cdn.jsdelivr.net/npm/@json-editor/json-editor@latest/dist/jsoneditor.min.js"></script>
+
+    <script>
+    // Set the default CSS theme and icon library globally
+    JSONEditor.defaults.theme = 'foundation5';
+    JSONEditor.defaults.iconlib = 'fontawesome4';
+    </script>
+</head>
+<body>
+<div class='row'>
+    <div id='editor_holder' class='medium-12 columns'></div>
+</div>
+
+<div class='row'>
+    <div class='medium-12-columns'>
+        <button id='submit' class='tiny'>Submit (console.log)</button>
+        <span id='valid_indicator' class='label'></span>
+    </div>
+</div>
+
+<script>
+      // Initialize the editor
+      function init(input_schema, starting_value) {
+          var editor = new JSONEditor(document.getElementById('editor_holder'),{
+            schema: input_schema,
+            startval: starting_value
+          });
+
+          document.getElementById('submit').addEventListener('click',function() {
+            // Get the value from the editor
+            var value = JSON.stringify(editor.getValue());
+            Android.onResult(value);
+          });
+
+          // Hook up the validation indicator to update its
+          // status whenever the editor changes
+          editor.on('change',function() {
+            // Get an array of errors from the validator
+            var errors = editor.validate();
+
+            var indicator = document.getElementById('valid_indicator');
+
+            // Not valid
+            if(errors.length) {
+              indicator.className = 'label alert';
+              indicator.textContent = 'not valid';
+            }
+            // Valid
+            else {
+              indicator.className = 'label success';
+              indicator.textContent = 'valid';
+            }
+          });
+
+          return "OK!";
+      }
+    </script>
+</body>
+</html>

@@ -30,6 +30,11 @@
             android:name=".ui.list_functions.ListFunctionsActivity"
             android:label="@string/app_name">
         </activity>
+
+        <activity
+            android:name=".ui.edit_json.EditJsonActivity"
+            android:label="@string/app_name">
+        </activity>
     </application>
 
 </manifest>

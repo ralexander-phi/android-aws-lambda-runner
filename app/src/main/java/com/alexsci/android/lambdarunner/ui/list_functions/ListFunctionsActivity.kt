@@ -1,7 +1,7 @@
 package com.alexsci.android.lambdarunner.ui.list_functions
 
 import android.content.Context
-import android.os.AsyncTask
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -11,13 +11,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.alexsci.android.lambdarunner.R
-import com.alexsci.android.lambdarunner.aws.lambda.InvokeFunctionRequest
-import com.alexsci.android.lambdarunner.aws.lambda.LambdaClient
+import com.alexsci.android.lambdarunner.aws.lambda.LambdaClientBuilder
 import com.alexsci.android.lambdarunner.data.list_functions.model.Function
 import com.alexsci.android.lambdarunner.ui.ExpandableItemArrayAdapter
-import com.alexsci.android.lambdarunner.util.crypto.KeyManagement
-import com.amazonaws.auth.BasicAWSCredentials
-import com.amazonaws.internal.StaticCredentialsProvider
+import com.alexsci.android.lambdarunner.ui.edit_json.EditJsonActivity
+import com.amazonaws.regions.Regions
 
 class ListFunctionsActivity: AppCompatActivity() {
     companion object {
@@ -34,10 +32,8 @@ class ListFunctionsActivity: AppCompatActivity() {
         val listView = findViewById<ListView>(R.id.list)
 
         val accessKey = intent.getStringExtra(EXTRA_ACCESS_KEY)
-        val secretKey = KeyManagement.getInstance(this).getKey(accessKey)
-        val creds = BasicAWSCredentials(accessKey, secretKey)
-        val credsProvider = StaticCredentialsProvider(creds)
-        val lambdaClient = LambdaClient(credsProvider)
+        val lambdaClientBuilder = LambdaClientBuilder("us-east-1", accessKey)
+        val lambdaClient = lambdaClientBuilder.getClient(this)
 
         listFunctionsViewModel = ViewModelProviders.of(
             this,
@@ -55,7 +51,12 @@ class ListFunctionsActivity: AppCompatActivity() {
             if (listFunctionsResult.success != null) {
                 Toast.makeText(this, "Yay! " + listFunctionsResult.success.toString(), Toast.LENGTH_LONG).show()
 
-                val expandableListAdapter = ExpandableFunctionArrayAdapter(this, lambdaClient, listFunctionsResult.success.functions)
+                val expandableListAdapter = ExpandableFunctionArrayAdapter(
+                    this,
+                    lambdaClientBuilder,
+                    listFunctionsResult.success.functions
+                )
+
                 listView.adapter = expandableListAdapter
             }
         })
@@ -67,7 +68,7 @@ class ListFunctionsActivity: AppCompatActivity() {
 
 class ExpandableFunctionArrayAdapter(
     _context: Context,
-    private val client: LambdaClient, // TODO - remove...
+    private val clientBuilder: LambdaClientBuilder,
     _items: List<Function>):
     ExpandableItemArrayAdapter<Function>(_context, _items) {
 
@@ -102,39 +103,15 @@ class ExpandableFunctionArrayAdapter(
         remove.setOnClickListener { items.remove(currentItem) }
 
         run.setOnClickListener {
-            InvokeFunctionTask(
-                context,
-                client,
-                title.text.toString(),
-                "{\"key1\": \"value1\", \"key2\": \"value2\", \"key3\": \"value3\"}"
-            ).execute(null)
+            val intent = Intent(context, EditJsonActivity::class.java)
+            intent.putExtra(EditJsonActivity.EXTRA_JSON_SCHEMA, "{\"\$schema\": \"http://json-schema.org/schema#\", \"type\": \"object\", \"properties\": { \"name\": { \"type\": \"string\" } }, \"required\": [ \"name\" ] }")
+            intent.putExtra(EditJsonActivity.EXTRA_LAMBDA_CLIENT_BUILDER, clientBuilder)
+            intent.putExtra(EditJsonActivity.EXTRA_LAMBDA_FUNCTION_NAME, title.text.toString())
+            context.startActivity(intent)
         }
 
         return convertView
     }
 
-}
-
-class InvokeFunctionTask(
-    private val context: Context,
-    private val client: LambdaClient,
-    private val functionName: String,
-    private val payload: String
-):
-        AsyncTask<Void, Void, String>() {
-
-    override fun doInBackground(vararg params: Void?): String {
-        val request = InvokeFunctionRequest(functionName, payload, logType="Tail")
-        val result = client.invoke(request)
-        return result.payload
-    }
-
-    override fun onPostExecute(result: String?) {
-        super.onPostExecute(result)
-
-        if (result != null) {
-            Toast.makeText(context, "Got: $result", Toast.LENGTH_LONG).show()
-        }
-    }
 }
 

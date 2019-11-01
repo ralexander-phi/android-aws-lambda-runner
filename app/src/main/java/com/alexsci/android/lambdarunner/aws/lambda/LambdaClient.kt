@@ -1,18 +1,24 @@
 package com.alexsci.android.lambdarunner.aws.lambda
 
+import android.content.Context
 import com.alexsci.android.lambdarunner.aws.base.*
+import com.alexsci.android.lambdarunner.util.crypto.GetKeysThread
+import com.alexsci.android.lambdarunner.util.crypto.KeyManagement
 import com.amazonaws.AmazonWebServiceResponse
 import com.amazonaws.ClientConfiguration
 import com.amazonaws.DefaultRequest
 import com.amazonaws.auth.AWSCredentialsProvider
+import com.amazonaws.auth.BasicAWSCredentials
 import com.amazonaws.http.AmazonHttpClient
 import com.amazonaws.http.ExecutionContext
 import com.amazonaws.http.HttpMethodName
 import com.amazonaws.http.HttpResponse
+import com.amazonaws.internal.StaticCredentialsProvider
 import com.amazonaws.regions.Region
+import com.amazonaws.regions.Regions
 import com.google.gson.JsonParser
+import java.io.Serializable
 import java.net.URI
-import java.nio.charset.Charset
 
 class LambdaClient(
     _credProvider: AWSCredentialsProvider,
@@ -81,6 +87,18 @@ class LambdaClient(
             )
 
         return response.awsResponse
+    }
+}
+
+class LambdaClientBuilder(
+    private val region: String,
+    private val accessKey: String
+) : Serializable {
+    fun getClient(context: Context) : LambdaClient {
+        val secretKey = KeyManagement.getInstance(context).getKey(accessKey)
+        val creds = BasicAWSCredentials(accessKey, secretKey)
+        val credsProvider = StaticCredentialsProvider(creds)
+        return LambdaClient(credsProvider, Region.getRegion(region))
     }
 }
 

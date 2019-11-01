@@ -10,7 +10,7 @@ private class ListTask(
     val repo: FunctionsRepository,
     val result: MutableLiveData<ListFunctionsResult>
 ): AsyncTask<Void, Void, ListFunctionsResult>() {
-    override fun doInBackground(vararg params: Void): ListFunctionsResult{
+    override fun doInBackground(vararg params: Void): ListFunctionsResult {
         val functions = repo.list()
         if (functions != null) {
             return ListFunctionsResult(FunctionListView(functions), null)
