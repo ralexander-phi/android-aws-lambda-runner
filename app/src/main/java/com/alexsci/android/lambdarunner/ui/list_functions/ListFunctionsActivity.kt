@@ -1,6 +1,5 @@
 package com.alexsci.android.lambdarunner.ui.list_functions
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -10,12 +9,12 @@ import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.alexsci.android.lambdarunner.R
 import com.alexsci.android.lambdarunner.aws.lambda.LambdaClientBuilder
 import com.alexsci.android.lambdarunner.data.list_functions.model.Function
-import com.alexsci.android.lambdarunner.ui.ExpandableItemArrayAdapter
 import com.alexsci.android.lambdarunner.ui.edit_json.EditJsonActivity
-import com.amazonaws.regions.Regions
 
 class ListFunctionsActivity: AppCompatActivity() {
     companion object {
@@ -23,17 +22,22 @@ class ListFunctionsActivity: AppCompatActivity() {
     }
 
     private lateinit var listFunctionsViewModel: ListFunctionsViewModel
+    private lateinit var recyclerView: RecyclerView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_list_items)
         val loading = findViewById<ProgressBar>(R.id.loading)
-        val listView = findViewById<ListView>(R.id.list)
 
         val accessKey = intent.getStringExtra(EXTRA_ACCESS_KEY)
         val lambdaClientBuilder = LambdaClientBuilder("us-east-1", accessKey)
         val lambdaClient = lambdaClientBuilder.getClient(this)
+
+        recyclerView = findViewById<RecyclerView>(R.id.recycler_view).apply {
+            setHasFixedSize(false)
+            layoutManager = LinearLayoutManager(this@ListFunctionsActivity)
+        }
 
         listFunctionsViewModel = ViewModelProviders.of(
             this,
@@ -51,13 +55,11 @@ class ListFunctionsActivity: AppCompatActivity() {
             if (listFunctionsResult.success != null) {
                 Toast.makeText(this, "Yay! " + listFunctionsResult.success.toString(), Toast.LENGTH_LONG).show()
 
-                val expandableListAdapter = ExpandableFunctionArrayAdapter(
-                    this,
+                val listAdapter = FunctionArrayAdapter(
                     lambdaClientBuilder,
                     listFunctionsResult.success.functions
                 )
-
-                listView.adapter = expandableListAdapter
+                recyclerView.adapter = listAdapter
             }
         })
 
@@ -66,29 +68,31 @@ class ListFunctionsActivity: AppCompatActivity() {
     }
 }
 
-class ExpandableFunctionArrayAdapter(
-    _context: Context,
+class FunctionArrayAdapter(
     private val clientBuilder: LambdaClientBuilder,
-    _items: List<Function>):
-    ExpandableItemArrayAdapter<Function>(_context, _items) {
+    private val data: List<Function>
+): RecyclerView.Adapter<FunctionArrayAdapter.ViewHolder>() {
+    class ViewHolder(val view: View) : RecyclerView.ViewHolder(view)
 
-    override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-        var convertView = convertView
-        if (convertView == null) {
-            convertView = LayoutInflater.from(context)
-                .inflate(R.layout.list_item, parent, false)
-        }
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        val view = LayoutInflater
+            .from(parent.context)
+            .inflate(R.layout.list_item, parent, false)
+        return ViewHolder(view)
+    }
 
-        val title: TextView = convertView!!.findViewById(R.id.title)
-        val description: TextView = convertView.findViewById(R.id.description)
-        val buttonPanel: LinearLayout = convertView.findViewById(R.id.buttonPanel)
-        val remove: Button = convertView.findViewById(R.id.remove)
-        val run: Button = convertView.findViewById(R.id.run)
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        val context = holder.view.context
+        val title: TextView = holder.view.findViewById(R.id.title)
+        val description: TextView = holder.view.findViewById(R.id.description)
+        val buttonPanel: LinearLayout = holder.view.findViewById(R.id.buttonPanel)
+        val remove: Button = holder.view.findViewById(R.id.remove)
+        val run: Button = holder.view.findViewById(R.id.run)
 
-        val currentItem = getItem(position) as Function
+        val currentItem = data[position]
 
-        title.setText(currentItem.functionName)
-        description.setText(currentItem.description)
+        title.text = currentItem.functionName
+        description.text = currentItem.description
 
         title.setOnClickListener {
             if (description.visibility == View.GONE) {
@@ -100,7 +104,15 @@ class ExpandableFunctionArrayAdapter(
             }
         }
 
-        remove.setOnClickListener { items.remove(currentItem) }
+        // Start hidden
+        description.visibility = View.GONE
+        buttonPanel.visibility = View.GONE
+
+        run.setOnClickListener {
+            val intent = Intent(context, ListFunctionsActivity::class.java)
+            intent.putExtra(ListFunctionsActivity.EXTRA_ACCESS_KEY, currentItem.functionName)
+            context.startActivity(intent)
+        }
 
         run.setOnClickListener {
             val intent = Intent(context, EditJsonActivity::class.java)
@@ -110,8 +122,10 @@ class ExpandableFunctionArrayAdapter(
             context.startActivity(intent)
         }
 
-        return convertView
+        remove.setOnClickListener {
+            data.drop(position)
+        }
     }
 
+    override fun getItemCount() = data.size
 }
-

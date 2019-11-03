@@ -37,6 +37,7 @@ dependencies {
     implementation 'androidx.core:core-ktx:1.0.2'
     implementation 'androidx.lifecycle:lifecycle-extensions:2.0.0'
     implementation 'com.amazonaws:aws-android-sdk-core:2.16.1'
+    implementation 'com.android.support:recyclerview-v7:29.0.0'
     implementation 'com.google.android.material:material:1.0.0'
     implementation 'com.google.guava:guava:28.1-android'
     implementation 'com.google.http-client:google-http-client-gson:1.19.0'
