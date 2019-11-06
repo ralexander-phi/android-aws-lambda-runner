@@ -40,7 +40,7 @@ class EditJsonActivity: AppCompatActivity() {
             WebAppInterface(
                 this,
                 lambdaClientBuilder,
-                lambdaFunctionName
+                lambdaFunctionName!!
             ),
             "Android"
         )
@@ -58,7 +58,7 @@ class MyWebViewClient(
         val schemaEscaped = schema.replace("\"", "\\\"")
 
         val js = if (initialValue != null) {
-            val initialValueEscaped = initialValue?.replace("\"", "\\\"")
+            val initialValueEscaped = initialValue.replace("\"", "\\\"")
             "init(\"$schemaEscaped\", \"$initialValueEscaped\");"
         } else {
             "init(\"$schemaEscaped\");"

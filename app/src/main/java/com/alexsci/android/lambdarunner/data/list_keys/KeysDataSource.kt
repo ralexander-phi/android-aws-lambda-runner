@@ -1,9 +1,9 @@
-package com.alexsci.android.lambdarunner.data.list_functions
+package com.alexsci.android.lambdarunner.data.list_keys
 
 import com.alexsci.android.lambdarunner.data.list_keys.model.Key
 import com.alexsci.android.lambdarunner.util.crypto.KeyManagement
 
-class KeysDataSource(val keyManagement: KeyManagement) {
+class KeysDataSource(private val keyManagement: KeyManagement) {
     fun listKeys() : List<Key> {
         val keyNames = keyManagement.listKeys()
         val keyModels = ArrayList<Key>(keyNames.size)
@@ -14,6 +14,10 @@ class KeysDataSource(val keyManagement: KeyManagement) {
         }
 
         return keyModels
+    }
+
+    fun remove(key: Key) {
+        keyManagement.deleteKey(key.keyName)
     }
 }
 

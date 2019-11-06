@@ -2,8 +2,8 @@ package com.alexsci.android.lambdarunner.ui.list_keys
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.alexsci.android.lambdarunner.data.list_functions.KeysDataSource
-import com.alexsci.android.lambdarunner.data.list_functions.KeysRepository
+import com.alexsci.android.lambdarunner.data.list_keys.KeysDataSource
+import com.alexsci.android.lambdarunner.data.list_keys.KeysRepository
 import com.alexsci.android.lambdarunner.util.crypto.KeyManagement
 
 class ListKeysViewModelFactory(val keyManagement: KeyManagement): ViewModelProvider.Factory {
@@ -14,7 +14,8 @@ class ListKeysViewModelFactory(val keyManagement: KeyManagement): ViewModelProvi
                 KeysRepository(
                     KeysDataSource(
                         keyManagement
-                    ))
+                    )
+                )
             ) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")

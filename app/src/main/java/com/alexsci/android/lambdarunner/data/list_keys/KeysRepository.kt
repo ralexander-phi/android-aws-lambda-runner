@@ -1,8 +1,6 @@
-package com.alexsci.android.lambdarunner.data.list_functions
+package com.alexsci.android.lambdarunner.data.list_keys
 
-import com.alexsci.android.lambdarunner.data.list_functions.model.Function
 import com.alexsci.android.lambdarunner.data.list_keys.model.Key
-
 
 class KeysRepository(val dataSource: KeysDataSource) {
     var functions: List<Key>? = null
@@ -11,5 +9,9 @@ class KeysRepository(val dataSource: KeysDataSource) {
     fun list(): List<Key>? {
         functions = dataSource.listKeys()
         return functions
+    }
+
+    fun remove(key: Key) {
+        dataSource.remove(key)
     }
 }

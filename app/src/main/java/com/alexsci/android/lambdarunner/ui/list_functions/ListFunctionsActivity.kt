@@ -31,7 +31,7 @@ class ListFunctionsActivity: AppCompatActivity() {
         val loading = findViewById<ProgressBar>(R.id.loading)
 
         val accessKey = intent.getStringExtra(EXTRA_ACCESS_KEY)
-        val lambdaClientBuilder = LambdaClientBuilder("us-east-1", accessKey)
+        val lambdaClientBuilder = LambdaClientBuilder("us-east-1", accessKey!!)
         val lambdaClient = lambdaClientBuilder.getClient(this)
 
         recyclerView = findViewById<RecyclerView>(R.id.recycler_view).apply {

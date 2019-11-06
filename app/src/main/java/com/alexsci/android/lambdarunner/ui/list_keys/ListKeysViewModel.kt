@@ -4,26 +4,8 @@ import android.os.AsyncTask
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.alexsci.android.lambdarunner.data.list_functions.KeysRepository
-
-private class ListTask(
-    val repo: KeysRepository,
-    val result: MutableLiveData<ListKeysResult>
-): AsyncTask<Void, Void, ListKeysResult>() {
-    override fun doInBackground(vararg params: Void): ListKeysResult {
-        val keys = repo.list()
-        if (keys != null) {
-            return ListKeysResult(KeyListView(keys), null)
-        }
-        return ListKeysResult(null, 0) // TODO
-    }
-
-
-    override fun onPostExecute(listKeysResult: ListKeysResult?) {
-        super.onPostExecute(listKeysResult)
-        result.value = listKeysResult
-    }
-}
+import com.alexsci.android.lambdarunner.data.list_keys.KeysRepository
+import com.alexsci.android.lambdarunner.data.list_keys.model.Key
 
 class ListKeysViewModel(private val keysRepository: KeysRepository) : ViewModel() {
 
@@ -31,9 +13,35 @@ class ListKeysViewModel(private val keysRepository: KeysRepository) : ViewModel(
     val listResult: LiveData<ListKeysResult> = _listResult
 
     fun list() {
-        ListTask(
-            keysRepository,
-            _listResult
-        ).execute(null)
+        ListTask().execute(null)
+    }
+
+    fun remove(key: Key) {
+        RemoveKeyTask(key).execute(null)
+    }
+
+    private inner open class ListTask: AsyncTask<Void, Void, ListKeysResult>() {
+        override fun doInBackground(vararg params: Void): ListKeysResult {
+            val keys = keysRepository.list()
+            if (keys != null) {
+                return ListKeysResult(KeyListView(keys), null)
+            }
+            return ListKeysResult(null, 0) // TODO
+        }
+
+        override fun onPostExecute(listKeysResult: ListKeysResult?) {
+            super.onPostExecute(listKeysResult)
+            _listResult.value = listKeysResult
+        }
+    }
+
+    private inner class RemoveKeyTask(
+        val key: Key
+    ): ListTask() {
+        override fun doInBackground(vararg params: Void): ListKeysResult {
+            keysRepository.remove(key)
+
+            return super.doInBackground(*params)
+        }
     }
 }

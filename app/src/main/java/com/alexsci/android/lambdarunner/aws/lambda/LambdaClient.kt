@@ -2,7 +2,6 @@ package com.alexsci.android.lambdarunner.aws.lambda
 
 import android.content.Context
 import com.alexsci.android.lambdarunner.aws.base.*
-import com.alexsci.android.lambdarunner.util.crypto.GetKeysThread
 import com.alexsci.android.lambdarunner.util.crypto.KeyManagement
 import com.amazonaws.AmazonWebServiceResponse
 import com.amazonaws.ClientConfiguration
@@ -15,7 +14,6 @@ import com.amazonaws.http.HttpMethodName
 import com.amazonaws.http.HttpResponse
 import com.amazonaws.internal.StaticCredentialsProvider
 import com.amazonaws.regions.Region
-import com.amazonaws.regions.Regions
 import com.google.gson.JsonParser
 import java.io.Serializable
 import java.net.URI
@@ -120,7 +118,8 @@ class InvokeFunctionResult(
 
 class InvokeFunctionsResponseHandler : BaseResponseHandler<AmazonWebServiceResponse<InvokeFunctionResult>>() {
     override fun doHandle(response: HttpResponse): AmazonWebServiceResponse<InvokeFunctionResult> {
-        if (responseContent == null) { throw RuntimeException("Null response content, no json") }
+        val responseContent = getResponseContent()
+            ?: throw RuntimeException("Null response content, no json")
 
         return AmazonWebServiceResponse<InvokeFunctionResult>().apply {
             result = InvokeFunctionResult(
@@ -153,7 +152,7 @@ class Function(
 
 class ListFunctionsResponseHandler : BaseResponseHandler<AmazonWebServiceResponse<ListFunctionsResult>>() {
     override fun doHandle(response: HttpResponse): AmazonWebServiceResponse<ListFunctionsResult> {
-        return parseJson(responseContent)
+        return parseJson(getResponseContent())
     }
 
     private fun parseJson(json: String?) : AmazonWebServiceResponse<ListFunctionsResult> {

@@ -39,7 +39,8 @@ fun <T> Request<T>.addParameterIfNonNull(name: String, value: String?) {
 
 
 abstract class BaseResponseHandler<T> : HttpResponseHandler<T> {
-    var responseContent: String? = null
+    var response: HttpResponse? = null
+    private var responseContent: String? = null
 
     override fun needsConnectionLeftOpen(): Boolean = true
 
@@ -51,10 +52,15 @@ abstract class BaseResponseHandler<T> : HttpResponseHandler<T> {
         Log.v("RAA", "Status: " + response.statusCode + " -> " + response.statusText)
         Log.v("RAA", "Headers: " + response.headers.toString())
 
-        responseContent = response.content.bufferedReader().use(BufferedReader::readText)
-        Log.v("RAA", "Content: $responseContent")
-
+        this.response = response
         return doHandle(response)
+    }
+
+    fun getResponseContent() : String? {
+        if (responseContent == null) {
+            responseContent = response!!.content.bufferedReader().use(BufferedReader::readText)
+        }
+        return responseContent
     }
 
     abstract fun doHandle(response: HttpResponse): T

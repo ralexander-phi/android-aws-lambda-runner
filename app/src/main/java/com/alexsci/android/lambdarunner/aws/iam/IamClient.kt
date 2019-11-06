@@ -5,13 +5,17 @@ import com.alexsci.android.lambdarunner.aws.base.*
 import com.amazonaws.AmazonWebServiceResponse
 import com.amazonaws.ClientConfiguration
 import com.amazonaws.DefaultRequest
-import com.amazonaws.ResponseMetadata
 import com.amazonaws.auth.AWSCredentialsProvider
-import com.amazonaws.http.*
+import com.amazonaws.http.AmazonHttpClient
+import com.amazonaws.http.ExecutionContext
+import com.amazonaws.http.HttpMethodName
+import com.amazonaws.http.HttpResponse
 import com.amazonaws.regions.Region
+import com.amazonaws.util.XmlUtils
 import com.google.api.client.util.DateTime
-import com.google.gson.JsonParser
-import java.lang.RuntimeException
+import org.xml.sax.Attributes
+import org.xml.sax.ContentHandler
+import org.xml.sax.Locator
 import java.net.URI
 
 class IamClient(credProvider: AWSCredentialsProvider):
@@ -24,7 +28,7 @@ class IamClient(credProvider: AWSCredentialsProvider):
     /*
       See https://docs.aws.amazon.com/IAM/latest/APIReference/API_GetUser.html
      */
-    fun getUser(getUserRequest: GetUserRequest? = null) : GetUserResult {
+    fun getUser(getUserRequest: GetUserRequest? = null) : GetUserResponse {
         val getUserRequest = getUserRequest ?: GetUserRequest()
 
         val request = DefaultRequest<Void>("iam")
@@ -47,44 +51,89 @@ class IamClient(credProvider: AWSCredentialsProvider):
     }
 }
 
-class GetUserResponseHandler : BaseResponseHandler<AmazonWebServiceResponse<GetUserResult>>() {
-    override fun doHandle(response: HttpResponse): AmazonWebServiceResponse<GetUserResult> {
-        val parsedResult = parseJson(responseContent)
-
+class GetUserResponseHandler : BaseResponseHandler<AmazonWebServiceResponse<GetUserResponse>>() {
+    override fun doHandle(response: HttpResponse): AmazonWebServiceResponse<GetUserResponse> {
+        val parsedResult = parseResponse()
         Log.i("RAA", parsedResult.responseMetadata.requestId)
-
         return parsedResult
     }
 
-    private fun parseJson(json: String?) : AmazonWebServiceResponse<GetUserResult> {
-        if (json == null) { throw RuntimeException("Null response content, no json") }
+    private fun parseResponse() : AmazonWebServiceResponse<GetUserResponse> {
+        val handler = GetUserContentHandler()
+        System.setProperty("org.xml.sax.driver","org.xmlpull.v1.sax2.Driver")
+        XmlUtils.parse(response!!.content, handler)
 
-        val rootObject = JsonParser().parse(json).asJsonObject
-        val userObject = rootObject.getAsJsonObject("User")
-        val metadataObject = rootObject.getAsJsonObject("ResponseMetadata")
+        return AmazonWebServiceResponse<GetUserResponse>().apply {
+            responseMetadata = handler.response.responseMetadata.asAwsType()
+            result = handler.response
+        }
+    }
 
-        val user = User(
-            userObject.get("UserId").asString,
-            userObject.get("Path").asString,
-            userObject.get("UserName").asString,
-            userObject.get("Arn").asString,
-            DateTime(userObject.get("CreateData").asString),
-            DateTime(userObject.get("PasswordLastUsed").asString)
-        )
+    private class GetUserContentHandler(
+    ) : ContentHandler {
 
-        val metadataMap = HashMap<String, String>()
-        for(entry in metadataObject.entrySet()) {
-            if (entry.value.isJsonPrimitive) {
-                if (entry.value.asJsonPrimitive.isString) {
-                    metadataMap[entry.key] = entry.value.asJsonPrimitive.asString
-                }
+        lateinit var response: GetUserResponse
+        private lateinit var responseBuilder: GetUserResponse.Builder
+        private lateinit var getUserResultBuilder: GetUserResult.Builder
+        private lateinit var userBuilder: User.Builder
+        private lateinit var responseMetadataBuilder: ResponseMetadata.Builder
+        private lateinit var elementChars: StringBuilder
+
+        override fun startElement(
+            uri: String?,
+            localName: String?,
+            qName: String?,
+            atts: Attributes?
+        ) {
+            // reset to store the chars of this element
+            elementChars = StringBuilder()
+
+            when(localName) {
+                "GetUserResponse" -> responseBuilder = GetUserResponse.Builder()
+                "GetUserResult" -> getUserResultBuilder = GetUserResult.Builder()
+                "User" -> userBuilder = User.Builder()
+                "ResponseMetadata" -> responseMetadataBuilder = ResponseMetadata.Builder()
             }
         }
 
-        return AmazonWebServiceResponse<GetUserResult>().apply {
-            responseMetadata = ResponseMetadata(metadataMap)
-            result = GetUserResult(user)
+        override fun endElement(uri: String?, localName: String?, qName: String?) {
+            val foundChars = elementChars.toString()
+
+            Log.i("RAA", "Ending: $localName $foundChars")
+
+            when (localName) {
+                "GetUserResponse" -> response = responseBuilder.build()
+
+                "GetUserResult" -> responseBuilder.getUserResult(getUserResultBuilder.build())
+
+                "User" -> getUserResultBuilder.user(userBuilder.build())
+                "UserId" -> userBuilder.userId(foundChars)
+                "Path" -> userBuilder.path(foundChars)
+                "UserName" -> userBuilder.userName(foundChars)
+                "Arn" -> userBuilder.arn(foundChars)
+                "CreateDate" -> userBuilder.createDate(DateTime(foundChars))
+                "PasswordLastUsed" -> userBuilder.passwordLastUsed(DateTime(foundChars))
+
+                "ResponseMetadata" -> responseBuilder.responseMetadata(responseMetadataBuilder.build())
+                "RequestId" -> responseMetadataBuilder.requestId(foundChars)
+            }
         }
+
+        override fun characters(ch: CharArray?, start: Int, length: Int) {
+            if (ch == null) return
+
+            elementChars.append(ch.slice(IntRange(start, start+length-1)).joinToString(""))
+        }
+
+        // Unused
+        override fun startDocument() {}
+        override fun endDocument() {}
+        override fun skippedEntity(name: String?) {}
+        override fun setDocumentLocator(locator: Locator?) {}
+        override fun endPrefixMapping(prefix: String?) {}
+        override fun processingInstruction(target: String?, data: String?) {}
+        override fun startPrefixMapping(prefix: String?, uri: String?) {}
+        override fun ignorableWhitespace(ch: CharArray?, start: Int, length: Int) {}
     }
 }
 
@@ -94,16 +143,81 @@ class GetUserRequest(val username: String? = null) :
         "2010-05-08"
     )
 
-class GetUserResult(
-    val user: User
-)
+class GetUserResponse private constructor(
+    val getUserResult: GetUserResult,
+    val responseMetadata: ResponseMetadata
+) {
+    data class Builder(
+        var getUserResult: GetUserResult? = null,
+        var responseMetadata: ResponseMetadata? = null
+    ) {
+        fun getUserResult(getUserResult: GetUserResult) { this.getUserResult = getUserResult }
+        fun responseMetadata(responseMetadata: ResponseMetadata) { this.responseMetadata = responseMetadata }
 
-class User(
+        fun build(): GetUserResponse {
+            return GetUserResponse(getUserResult!!, responseMetadata!!)
+        }
+    }
+}
+
+class GetUserResult private constructor(
+    val user: User
+) {
+    data class Builder(
+        var user: User? = null
+    ) {
+        fun user(user: User) { this.user = user }
+
+        fun build(): GetUserResult {
+            return GetUserResult(user!!)
+        }
+    }
+}
+
+class ResponseMetadata private constructor(
+    val requestId: String
+) {
+    data class Builder(
+        var requestId: String? = null
+    ) {
+        fun requestId(requestId: String) { this.requestId = requestId }
+        fun build(): ResponseMetadata {
+            return ResponseMetadata(requestId!!)
+        }
+    }
+
+    fun asAwsType() : com.amazonaws.ResponseMetadata {
+        val map = HashMap<String, String>()
+        map[com.amazonaws.ResponseMetadata.AWS_REQUEST_ID] = requestId
+        return com.amazonaws.ResponseMetadata(map)
+    }
+}
+
+class User private constructor(
     val userId: String,
     val path: String,
     val userName: String,
     val arn: String,
     val createDate: DateTime,
-    val passwordLastUsed: DateTime
-)
+    val passwordLastUsed: DateTime?
+) {
+    data class Builder(
+        var userId: String? = null,
+        var path: String? = null,
+        var userName: String? = null,
+        var arn: String? = null,
+        var createDate: DateTime? = null,
+        var passwordLastUsed: DateTime? = null
+    ) {
+        fun userId(userId: String) { this.userId = userId }
+        fun path(path: String) { this.path = path }
+        fun userName(userName: String) { this.userName = userName }
+        fun arn(arn: String) { this.arn = arn }
+        fun createDate(createDate: DateTime) { this.createDate = createDate }
+        fun passwordLastUsed(passwordLastUsed: DateTime) { this.passwordLastUsed = passwordLastUsed }
 
+        fun build() : User {
+            return User(userId!!, path!!, userName!!, arn!!, createDate!!, passwordLastUsed)
+        }
+    }
+}
