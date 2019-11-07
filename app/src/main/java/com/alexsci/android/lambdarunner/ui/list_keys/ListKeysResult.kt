@@ -1,6 +1,8 @@
 package com.alexsci.android.lambdarunner.ui.list_keys
 
-data class ListKeysResult(
-    val success: KeyListView? = null,
-    val error: Int? = null
-)
+import com.alexsci.android.lambdarunner.ui.common.BaseListResult
+
+class ListKeysResult(
+    success: KeyListView? = null,
+    error: Int? = null
+): BaseListResult<KeyListView>(success, error)

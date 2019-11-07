@@ -5,76 +5,42 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
-import androidx.appcompat.app.AppCompatActivity
+import android.widget.Button
+import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.core.view.isVisible
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.alexsci.android.lambdarunner.R
 import com.alexsci.android.lambdarunner.data.list_keys.model.Key
 import com.alexsci.android.lambdarunner.ui.add_key.AddKeyActivity
+import com.alexsci.android.lambdarunner.ui.common.BaseListActivity
 import com.alexsci.android.lambdarunner.ui.list_functions.ListFunctionsActivity
 import com.alexsci.android.lambdarunner.util.crypto.KeyManagement
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 
-
-class ListKeysActivity: AppCompatActivity() {
+class ListKeysActivity: BaseListActivity() {
 
     private lateinit var listKeysViewModel: ListKeysViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setContentView(R.layout.activity_list_items)
-
         listKeysViewModel = ViewModelProviders.of(
             this,
             ListKeysViewModelFactory(KeyManagement.getInstance(this))
         ).get(ListKeysViewModel::class.java)
 
-        val loadingProgressBar = findViewById<ProgressBar>(R.id.loading)
-        val noKeysMessage = findViewById<TextView>(R.id.no_keys_message)
+        this.title = "AWS Credentials"
 
-        val recyclerView = findViewById<RecyclerView>(R.id.recycler_view).apply {
-            setHasFixedSize(false)
-            layoutManager = LinearLayoutManager(this@ListKeysActivity)
+        addButton.setOnClickListener {
+            val intent = Intent(this.baseContext, AddKeyActivity::class.java)
+            startActivity(intent)
         }
 
-        findViewById<FloatingActionButton>(R.id.add_button).apply {
-            setOnClickListener {
-                val intent = Intent(context, AddKeyActivity::class.java)
-                startActivity(intent)
-            }
-        }
-
-        this.title = "Select AWS Credentials"
-        loadingProgressBar.isVisible = true
-        recyclerView.isVisible = false
-        noKeysMessage.isVisible = false
-
-        listKeysViewModel.listResult.observe(this@ListKeysActivity, Observer {
-            val listKeysResult = it ?: return@Observer
-
-            loadingProgressBar.isVisible = false
-            if (listKeysResult.error != null) {
-                Toast.makeText(this, "Oops! " + listKeysResult.error.toString(), Toast.LENGTH_LONG)
-                    .show()
-            }
-            if (listKeysResult.success != null) {
-                if (listKeysResult.success.keys.isEmpty()) {
-                    recyclerView.isVisible = false
-                    noKeysMessage.isVisible = true
-                } else {
-                    val listAdapter = KeyArrayAdapter(listKeysResult.success.keys.toMutableList())
-                    recyclerView.isVisible = true
-                    noKeysMessage.isVisible = false
-                    recyclerView.adapter = listAdapter
-                }
-            }
-        })
-
+        listKeysViewModel.listResult.observe(
+            this@ListKeysActivity,
+            KeyListObserver()
+        )
     }
 
     override fun onStart() {
@@ -82,6 +48,21 @@ class ListKeysActivity: AppCompatActivity() {
 
         // Start showing the list
         listKeysViewModel.list()
+    }
+
+    inner class KeyListObserver: BaseListObserver<ListKeysResult>() {
+        override fun onSuccess(t: ListKeysResult) {
+            loadingProgressBar.isVisible = false
+            if (t.success!!.keys.isEmpty()) {
+                recyclerView.isVisible = false
+                noKeysMessage.isVisible = true
+            } else {
+                val listAdapter = KeyArrayAdapter(t.success.keys.toMutableList())
+                recyclerView.isVisible = true
+                noKeysMessage.isVisible = false
+                recyclerView.adapter = listAdapter
+            }
+        }
     }
 
     private inner class KeyArrayAdapter(private val data: MutableList<Key>) :
@@ -130,7 +111,6 @@ class ListKeysActivity: AppCompatActivity() {
             }
 
             remove.setOnClickListener {
-                val currentItem = data[position]
                 listKeysViewModel.remove(currentItem)
             }
         }
