@@ -2,6 +2,16 @@ package com.alexsci.android.lambdarunner.ui.edit_json
 
 import java.util.*
 
+enum class JsonTypes {
+    Object,
+    Array,
+    String,
+    Number,
+    Boolean,
+    Null,
+    Property
+}
+
 abstract class JsonType(val type: JsonTypes)
 
 internal class JsonObject(var value: MutableMap<String, JsonType>): JsonType(JsonTypes.Object) {
@@ -17,3 +27,4 @@ internal class JsonNumber(var value: Double): JsonType(JsonTypes.Number)
 internal class JsonBoolean(var value: Boolean): JsonType(JsonTypes.Boolean)
 internal class JsonNull: JsonType(JsonTypes.Null)
 internal class JsonProperty(var key: String, var value: JsonType): JsonType(JsonTypes.Property)
+
