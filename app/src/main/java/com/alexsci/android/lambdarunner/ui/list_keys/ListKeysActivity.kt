@@ -2,11 +2,8 @@ package com.alexsci.android.lambdarunner.ui.list_keys
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Button
-import android.widget.TextView
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProviders
-import com.alexsci.android.lambdarunner.R
 import com.alexsci.android.lambdarunner.data.list_keys.model.Key
 import com.alexsci.android.lambdarunner.ui.add_key.AddKeyActivity
 import com.alexsci.android.lambdarunner.ui.common.BaseArrayAdapter

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#aaa"
+    android:padding="5dp"
+    >
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="#ccc"
+        android:padding="10dp"
+        >
+
+        <ImageButton
+            android:id="@+id/icon"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_alignParentTop="true"
+            android:src="@drawable/ic__code_braces"
+            android:background="#ccc"
+            android:scaleType="fitXY"
+            />
+
+        <ImageButton
+            android:id="@+id/add_button"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_alignParentRight="true"
+            android:src="@drawable/plus_circle_outline"
+            android:scaleType="fitXY"
+            android:background="#ccc"
+            />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/add_button"
+            android:layout_marginTop="10dp"
+            android:background="#eee"
+            android:paddingTop="10dp"
+            android:paddingHorizontal="5dp"
+            android:paddingBottom="5dp"
+            tools:listitem="@layout/json_object_property_view"
+            tools:itemCount="1"
+            />
+    </RelativeLayout>
+
+
+</LinearLayout>
