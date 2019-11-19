@@ -113,29 +113,29 @@ internal class JsonArrayAdapter: RecyclerView.Adapter<JsonViewHolder>() {
     override fun onBindViewHolder(holder: JsonViewHolder, position: Int) {
         val currentItem = data[position]
 
-        when (currentItem.type.ordinal) {
-            JsonTypes.Object.ordinal -> {}
+        when (currentItem.type) {
+            JsonTypes.Object -> {}
 
-            JsonTypes.Array.ordinal -> {}
+            JsonTypes.Array -> {}
 
-            JsonTypes.String.ordinal -> {
+            JsonTypes.String -> {
                 val stringItem = currentItem as JsonString
                 holder.view.findViewById<EditText>(R.id.value).setText(stringItem.value)
             }
 
-            JsonTypes.Number.ordinal -> {
+            JsonTypes.Number -> {
                 val numberItem = currentItem as JsonNumber
                 holder.view.findViewById<EditText>(R.id.value).setText(numberItem.value.toString())
             }
 
-            JsonTypes.Boolean.ordinal -> {
+            JsonTypes.Boolean -> {
                 val booleanItem = currentItem as JsonBoolean
                 holder.view.findViewById<ToggleButton>(R.id.value).isChecked = booleanItem.value
             }
 
-            JsonTypes.Null.ordinal -> {}
+            JsonTypes.Null -> {}
 
-            JsonTypes.Property.ordinal -> {
+            JsonTypes.Property -> {
                 val propertyItem = currentItem as JsonProperty
                 val key = holder.view.findViewById<EditText>(R.id.key)
                 val valueHolder = holder.view.findViewById<LinearLayout>(R.id.root_holder)

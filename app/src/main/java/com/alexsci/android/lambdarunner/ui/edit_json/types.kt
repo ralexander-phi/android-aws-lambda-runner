@@ -9,7 +9,7 @@ enum class JsonTypes {
     Number,
     Boolean,
     Null,
-    Property
+    Property // Not a JSON type, but something we will use
 }
 
 abstract class JsonType(val type: JsonTypes)
