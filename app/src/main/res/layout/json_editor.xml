@@ -7,21 +7,22 @@
     android:layout_height="match_parent"
     android:keepScreenOn="true">
 
-    <Button
-        android:id="@+id/run"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:text="Run"
-        />
-
     <LinearLayout
         android:id="@+id/root_holder"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
         android:layout_alignParentTop="true"
+        android:layout_above="@+id/run"
+        android:orientation="vertical"
+        />
+
+    <Button
+        android:id="@+id/done_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:text="Done"
         />
 
 </RelativeLayout>

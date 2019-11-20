@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Lambda</string>
+    <string name="app_name">Crayfish</string>
     <!-- Strings related to login -->
     <string name="prompt_access_key_id">AWS Access Key ID</string>
     <string name="prompt_secret_access_key">AWS Secret Access Key</string>

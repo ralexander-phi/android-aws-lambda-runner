@@ -1,16 +1,22 @@
 package com.alexsci.android.lambdarunner.ui.edit_json
 
+import android.app.Activity
 import android.content.DialogInterface
+import android.content.Intent
+import android.content.Intent.ACTION_SEND
+import android.content.Intent.EXTRA_TEXT
 import android.os.Bundle
 import android.os.PersistableBundle
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.ToggleButton
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.children
 import androidx.recyclerview.widget.RecyclerView
 import com.alexsci.android.lambdarunner.R
 import java.util.*
@@ -25,6 +31,7 @@ class EditJsonActivity: AppCompatActivity() {
         const val LOG_TAG = "EditJsonActivity"
     }
 
+
     private lateinit var rootLayout: LinearLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -32,6 +39,15 @@ class EditJsonActivity: AppCompatActivity() {
 
         setContentView(R.layout.json_editor)
         rootLayout = findViewById(R.id.root_holder)
+
+        findViewById<Button>(R.id.done_button).also {button ->
+            button.setOnClickListener {
+                setResult(Activity.RESULT_OK, Intent(ACTION_SEND).also {intent ->
+                    intent.putExtra(EXTRA_TEXT, getJson())
+                })
+                finish()
+            }
+        }
     }
 
     override fun onStart() {
@@ -81,6 +97,12 @@ class EditJsonActivity: AppCompatActivity() {
         super.onRestoreInstanceState(savedInstanceState, persistentState)
 
         Log.i(LOG_TAG, savedInstanceState?.getString("Foo")!!)
+    }
+
+    private fun getJson(): String {
+        assert(rootLayout.childCount == 1)
+        val root = rootLayout.children.first()
+        return ""
     }
 }
 
