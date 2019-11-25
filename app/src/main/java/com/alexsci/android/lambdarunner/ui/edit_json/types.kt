@@ -1,6 +1,9 @@
 package com.alexsci.android.lambdarunner.ui.edit_json
 
-import java.util.*
+import com.google.gson.*
+import com.google.gson.JsonArray
+import com.google.gson.JsonNull
+import com.google.gson.JsonObject
 
 enum class JsonTypes {
     Object,
@@ -9,22 +12,66 @@ enum class JsonTypes {
     Number,
     Boolean,
     Null,
-    Property // Not a JSON type, but something we will use
+    // Not JSON types, but something we will use
+    PropertyKey,
+    EndObject,
+    EndArray
 }
 
-abstract class JsonType(val type: JsonTypes)
-
-internal class JsonObject(var value: MutableMap<String, JsonType>): JsonType(JsonTypes.Object) {
-    constructor(): this(TreeMap<String, JsonType>())
+abstract class JsonType(val type: JsonTypes) {
+    abstract fun asJsonElement(): JsonElement
 }
 
-internal class JsonArray(var value: MutableList<JsonType>): JsonType(JsonTypes.Array) {
-    constructor(): this(ArrayList<JsonType>())
+internal class JsonObject: JsonType(JsonTypes.Object) {
+    override fun asJsonElement(): JsonObject {
+        return JsonObject()
+    }
 }
 
-internal class JsonString(var value: String): JsonType(JsonTypes.String)
-internal class JsonNumber(var value: Double): JsonType(JsonTypes.Number)
-internal class JsonBoolean(var value: Boolean): JsonType(JsonTypes.Boolean)
-internal class JsonNull: JsonType(JsonTypes.Null)
-internal class JsonProperty(var key: String, var value: JsonType): JsonType(JsonTypes.Property)
+internal class JsonArray: JsonType(JsonTypes.Array) {
+    override fun asJsonElement(): JsonArray {
+        return JsonArray()
+    }
+}
 
+internal class JsonString(var value: String): JsonType(JsonTypes.String) {
+    override fun asJsonElement(): JsonPrimitive {
+        return JsonPrimitive(value)
+    }
+}
+
+internal class JsonNumber(var value: Double): JsonType(JsonTypes.Number) {
+    override fun asJsonElement(): JsonPrimitive {
+        return JsonPrimitive(value)
+    }
+}
+
+internal class JsonBoolean(var value: Boolean): JsonType(JsonTypes.Boolean) {
+    override fun asJsonElement(): JsonPrimitive {
+        return JsonPrimitive(value)
+    }
+}
+
+internal class JsonNull: JsonType(JsonTypes.Null) {
+    override fun asJsonElement(): JsonNull {
+        return JsonNull.INSTANCE
+    }
+}
+
+internal class JsonPropertyKey(var key: String): JsonType(JsonTypes.PropertyKey) {
+    override fun asJsonElement(): JsonElement {
+        throw RuntimeException("Has no JsonElement")
+    }
+}
+
+internal class JsonEndObject: JsonType(JsonTypes.EndObject) {
+    override fun asJsonElement(): JsonElement {
+        throw RuntimeException("Has no JsonElement")
+    }
+}
+
+internal class JsonEndArray: JsonType(JsonTypes.EndArray) {
+    override fun asJsonElement(): JsonElement {
+        throw RuntimeException("Has no JsonElement")
+    }
+}
