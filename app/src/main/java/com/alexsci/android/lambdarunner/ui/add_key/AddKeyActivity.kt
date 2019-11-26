@@ -3,6 +3,7 @@ package com.alexsci.android.lambdarunner.ui.add_key
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
@@ -59,7 +60,6 @@ class AddKeyActivity : AppCompatActivity() {
         detector = BarcodeDetector.Builder(applicationContext)
             .setBarcodeFormats(Barcode.DATA_MATRIX or Barcode.QR_CODE)
             .build()
-
 
         setContentView(R.layout.activity_add_key)
 
@@ -142,8 +142,12 @@ class AddKeyActivity : AppCompatActivity() {
                 )
             }
 
-            scanQrButton.setOnClickListener {
-                takePicture()
+            if (canTakePicture()) {
+                scanQrButton.setOnClickListener {
+                    takePicture()
+                }
+            } else {
+                scanQrButton.visibility = View.GONE
             }
         }
     }
@@ -186,7 +190,7 @@ class AddKeyActivity : AppCompatActivity() {
                     Log.e(LOG_TAG, e.toString())
                 }
             } finally {
-                // Cleanup the old photo
+                // Cleanup the old photo (remove the creds)
                 picturePath().delete()
             }
         }
@@ -210,19 +214,29 @@ class AddKeyActivity : AppCompatActivity() {
         )
     }
 
+    private fun canTakePicture(): Boolean {
+        val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        return packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY) &&
+                intent.resolveActivity(packageManager) != null
+    }
+
     private fun takePicture() {
         val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        val picPath = picturePath()
+
         imageUri = FileProvider.getUriForFile(
-            this@AddKeyActivity,
-            BuildConfig.APPLICATION_ID + ".provider",
-            picturePath()
+            AddKeyActivity@this,
+            applicationContext.packageName + ".provider",
+            picPath
         )
+
         intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri)
         startActivityForResult(intent, PHOTO_REQUEST)
     }
 
     private fun picturePath(): File {
-        return File(Environment.getExternalStorageDirectory(), " febb5514-d640-431f-a7a4-a5953cc2c1c0.jpg")
+        val storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        return File.createTempFile("qr-code", ".jpg", storageDir).absoluteFile
     }
 
     private fun showLoginFailed(@StringRes errorString: Int) {

@@ -6,10 +6,8 @@
     <string name="action_sign_in">Save</string>
     <string name="action_sign_in_short">Sign in</string>
     <string name="welcome">"Welcome !"</string>
+    <string name="empty_key_list">No credentials found.\nTry adding one below.</string>
     <string name="invalid_access_key_id">AWS Access Key ID is invalid</string>
     <string name="invalid_secret_access_key">AWS Secret Access Key is invalid</string>
     <string name="login_failed">Saving credential failed</string>
-    <string name="lorem_ipsum_one_paragraph">
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi in consectetur sem, vitae aliquet lacus. Nam in aliquet dolor. Donec at ipsum erat. Nam aliquam porttitor tempus. Aenean vitae tortor eu massa hendrerit molestie in sit amet lectus. Phasellus faucibus nulla vitae vestibulum auctor. Aliquam vehicula gravida vestibulum. Nam congue ullamcorper euismod. Quisque a mattis tellus.
-    </string>
 </resources>

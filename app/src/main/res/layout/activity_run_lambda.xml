@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorPrimary"
+    >
+
+    <TextView
+        android:id="@+id/credential"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:text="MyIAMUser"
+        android:padding="10dp"
+        android:background="@color/colorPrimaryDark"
+        />
+
+    <TextView
+        android:id="@+id/function_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:text="MyFunction"
+        android:padding="10dp"
+        android:background="@color/colorPrimaryDark"
+        />
+
+    <EditText
+        android:id="@+id/input"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/credential"
+        android:layout_marginTop="20dp"
+        android:lines="10"
+        android:background="#fff"
+        android:text="{}"
+        />
+
+    <ImageButton
+        android:id="@+id/edit_input"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/input"
+        android:layout_alignParentRight="true"
+        android:src="@drawable/pencil"
+        />
+
+    <Button
+        android:id="@+id/input_paste_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/input"
+        android:layout_toLeftOf="@+id/edit_input"
+        android:text="paste"
+        />
+
+    <ImageButton
+        android:id="@+id/scan_qr"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/input"
+        android:layout_toLeftOf="@+id/input_paste_button"
+        android:src="@drawable/qrcode_scan"
+        />
+
+    <ImageButton
+        android:id="@+id/input_pretty_toggle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/input"
+        android:layout_toLeftOf="@+id/scan_qr"
+        android:src="@drawable/eye"
+        />
+
+
+    <Button
+        android:id="@+id/invoke_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/edit_input"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="20dp"
+        android:text="Invoke"
+        />
+
+    <View
+        android:id="@+id/input_output_separator"
+        android:layout_width="match_parent"
+        android:layout_height="8dp"
+        android:layout_below="@id/invoke_button"
+        android:background="#aaa"
+        />
+
+    <EditText
+        android:id="@+id/output"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/input_output_separator"
+        android:layout_marginTop="20dp"
+        android:lines="10"
+        android:background="#fff"
+        />
+
+    <Button
+        android:id="@+id/copy_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/output"
+        android:layout_alignParentRight="true"
+        android:text="copy"
+        />
+</RelativeLayout>

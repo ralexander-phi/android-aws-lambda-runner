@@ -3,17 +3,15 @@ package com.alexsci.android.lambdarunner.ui.list_functions
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import android.widget.Button
-import android.widget.TextView
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProviders
-import com.alexsci.android.lambdarunner.R
 import com.alexsci.android.lambdarunner.aws.lambda.LambdaClientBuilder
 import com.alexsci.android.lambdarunner.data.list_functions.model.Function
 import com.alexsci.android.lambdarunner.ui.common.BaseArrayAdapter
 import com.alexsci.android.lambdarunner.ui.common.BaseListActivity
 import com.alexsci.android.lambdarunner.ui.common.ViewHolder
 import com.alexsci.android.lambdarunner.ui.edit_json.EditJsonActivity
+import com.alexsci.android.lambdarunner.ui.run_lambda.RunLambdaActivity
 
 class ListFunctionsActivity: BaseListActivity() {
     companion object {
@@ -83,7 +81,7 @@ class FunctionArrayAdapter(
         holder.description.text = currentItem.description
 
         holder.run.setOnClickListener {
-            val intent = Intent(context, EditJsonActivity::class.java)
+            val intent = Intent(context, RunLambdaActivity::class.java)
             intent.putExtra(EditJsonActivity.EXTRA_JSON_SCHEMA, "{\"\$schema\": \"http://json-schema.org/schema#\", \"type\": \"object\", \"properties\": { \"name\": { \"type\": \"string\" } }, \"required\": [ \"name\" ] }")
             intent.putExtra(EditJsonActivity.EXTRA_LAMBDA_CLIENT_BUILDER, clientBuilder)
             intent.putExtra(EditJsonActivity.EXTRA_LAMBDA_FUNCTION_NAME, currentItem.functionName)

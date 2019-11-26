@@ -4,7 +4,8 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    >
 
     <TextView
         android:id="@+id/title"
@@ -12,7 +13,8 @@
         android:layout_height="wrap_content"
         android:layout_margin="10dp"
         android:textAppearance="@style/TextAppearance.AppCompat.Title"
-        android:text="Item name"/>
+        android:text="Item name"
+        />
 
     <TextView
         android:id="@+id/description"
@@ -20,14 +22,14 @@
         android:layout_height="wrap_content"
         android:layout_margin="10dp"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-        android:text="@string/lorem_ipsum_one_paragraph" />
+        />
 
     <LinearLayout
         android:id="@+id/buttonPanel"
         android:orientation="horizontal"
         android:layout_height="wrap_content"
-        android:layout_width="match_parent">
-
+        android:layout_width="match_parent"
+        >
         <Button
             android:id="@+id/remove"
             android:layout_width="0dp"
@@ -35,7 +37,8 @@
             android:layout_height="wrap_content"
             android:layout_margin="15dp"
             android:background="@color/cardview_light_background"
-            android:text="Remove" />
+            android:text="Remove"
+            />
 
         <Button
             android:id="@+id/run"
@@ -44,6 +47,7 @@
             android:layout_height="wrap_content"
             android:layout_margin="15dp"
             android:background="@color/colorAccent"
-            android:text="Run" />
+            android:text="Run"
+            />
     </LinearLayout>
 </LinearLayout>

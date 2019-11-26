@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProviders
+import com.alexsci.android.lambdarunner.R
 import com.alexsci.android.lambdarunner.data.list_keys.model.Key
 import com.alexsci.android.lambdarunner.ui.add_key.AddKeyActivity
 import com.alexsci.android.lambdarunner.ui.common.BaseArrayAdapter
@@ -50,6 +51,7 @@ class ListKeysActivity: BaseListActivity() {
             if (t.success!!.keys.isEmpty()) {
                 recyclerView.isVisible = false
                 noKeysMessage.isVisible = true
+                noKeysMessage.setText(R.string.empty_key_list)
             } else {
                 recyclerView.isVisible = true
                 noKeysMessage.isVisible = false

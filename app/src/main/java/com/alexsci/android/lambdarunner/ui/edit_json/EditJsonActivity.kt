@@ -2,11 +2,9 @@ package com.alexsci.android.lambdarunner.ui.edit_json
 
 import android.app.Activity
 import android.content.DialogInterface
-import android.content.Intent
-import android.content.Intent.ACTION_SEND
-import android.content.Intent.EXTRA_TEXT
+import android.net.Uri
 import android.os.Bundle
-import android.os.PersistableBundle
+import android.provider.MediaStore
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
@@ -19,15 +17,14 @@ import androidx.recyclerview.widget.RecyclerView
 import com.alexsci.android.lambdarunner.R
 import com.google.gson.JsonElement
 import com.google.gson.JsonParser
+import java.io.*
 import java.util.*
 
 class EditJsonActivity: AppCompatActivity() {
     companion object {
-        const val EXTRA_JSON_SCHEMA = "com.alexsci.android.lambdarunner.ui.edit_json.json_schema"
-        const val EXTRA_LAMBDA_CLIENT_BUILDER =
-            "com.alexsci.android.lambdarunner.ui.edit_json.lambda_client_builder"
-        const val EXTRA_LAMBDA_FUNCTION_NAME=
-            "com.alexsci.android.lambdarunner.ui.edit_json.lambda_function_name"
+        const val EXTRA_JSON_SCHEMA = "json_schema"
+        const val EXTRA_LAMBDA_CLIENT_BUILDER = "lambda_client_builder"
+        const val EXTRA_LAMBDA_FUNCTION_NAME = "lambda_function_name"
 
         const val BUNDLE_SAVED_JSON = "json"
     }
@@ -35,6 +32,8 @@ class EditJsonActivity: AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var viewManager: LinearLayoutManager
     private lateinit var viewAdapter: JsonAdapter
+
+    private var editFile: File? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,10 +52,12 @@ class EditJsonActivity: AppCompatActivity() {
         findViewById<Button>(R.id.done_button).also { button ->
             button.setOnClickListener {
                 val json = getJson()
-                setResult(Activity.RESULT_OK, Intent(ACTION_SEND).also { intent ->
-                    intent.putExtra(EXTRA_TEXT, json)
-                })
-                Toast.makeText(this, json, Toast.LENGTH_LONG).show()
+                if (editFile != null) {
+                    FileOutputStream(editFile).bufferedWriter().use {
+                        it.write(json)
+                    }
+                }
+                setResult(Activity.RESULT_OK)
                 finish()
             }
         }
@@ -68,10 +69,15 @@ class EditJsonActivity: AppCompatActivity() {
         if (savedInstanceState != null) {
             val json = savedInstanceState.getString(BUNDLE_SAVED_JSON)
             if (json != null) {
-                val parser = JsonParser()
-                inflateJsonViewFromTree(parser.parse(json))
+                inflateJsonViewFromText(json)
             }
         }
+    }
+
+    private fun inflateJsonViewFromText(json: String) {
+        val parser = JsonParser()
+        inflateJsonViewFromTree(parser.parse(json))
+        viewAdapter.notifyDataSetChanged()
     }
 
     private fun inflateJsonViewFromTree(root: JsonElement, depth: Int = 0) {
@@ -112,7 +118,14 @@ class EditJsonActivity: AppCompatActivity() {
         super.onPostCreate(savedInstanceState)
 
         if (viewAdapter.data.isEmpty()) {
-            selectRootJsonType()
+            if (intent.hasExtra(MediaStore.EXTRA_OUTPUT)) {
+                editFile = File(intent.getStringExtra(MediaStore.EXTRA_OUTPUT))
+                FileReader(editFile).buffered().use {
+                    inflateJsonViewFromText(it.readText())
+                }
+            } else {
+                selectRootJsonType()
+            }
         }
     }
 
