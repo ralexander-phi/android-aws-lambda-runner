@@ -111,12 +111,10 @@ class RunLambdaActivity: AppCompatActivity() {
     }
 
     private fun editJson() {
-        val json = inputEditText.text.toString()
-        writeJsonBuffer(json)
+        writeJsonBuffer(inputEditText.text.toString())
 
         val intent = Intent(Intent.ACTION_EDIT)
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, jsonFile.absolutePath.toString())
-        intent.type = "application/json"
+        intent.setDataAndType(jsonUri,"application/json")
         startActivityForResult(intent, EDIT_JSON_REQUEST)
     }
 

@@ -33,7 +33,7 @@ class EditJsonActivity: AppCompatActivity() {
     private lateinit var viewManager: LinearLayoutManager
     private lateinit var viewAdapter: JsonAdapter
 
-    private var editFile: File? = null
+    private var editUri: Uri? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,9 +52,9 @@ class EditJsonActivity: AppCompatActivity() {
         findViewById<Button>(R.id.done_button).also { button ->
             button.setOnClickListener {
                 val json = getJson()
-                if (editFile != null) {
-                    FileOutputStream(editFile).bufferedWriter().use {
-                        it.write(json)
+                if (editUri != null) {
+                    contentResolver.openOutputStream(editUri!!)?.bufferedWriter().use {
+                        it?.write(json)
                     }
                 }
                 setResult(Activity.RESULT_OK)
@@ -118,10 +118,14 @@ class EditJsonActivity: AppCompatActivity() {
         super.onPostCreate(savedInstanceState)
 
         if (viewAdapter.data.isEmpty()) {
-            if (intent.hasExtra(MediaStore.EXTRA_OUTPUT)) {
-                editFile = File(intent.getStringExtra(MediaStore.EXTRA_OUTPUT))
-                FileReader(editFile).buffered().use {
-                    inflateJsonViewFromText(it.readText())
+            if (intent.data != null) {
+                editUri = intent.data
+
+                contentResolver.openInputStream(editUri!!)?.reader()?.buffered().use {
+                    val json = it?.readText()
+                    if (json != null) {
+                        inflateJsonViewFromText(json)
+                    }
                 }
             } else {
                 selectRootJsonType()
