@@ -6,9 +6,9 @@ import android.content.Intent
 import android.content.Intent.ACTION_SEND
 import android.content.Intent.EXTRA_TEXT
 import android.os.Bundle
+import android.os.PersistableBundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
@@ -18,8 +18,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.alexsci.android.lambdarunner.R
 import com.google.gson.JsonElement
+import com.google.gson.JsonParser
 import java.util.*
-
 
 class EditJsonActivity: AppCompatActivity() {
     companion object {
@@ -28,7 +28,8 @@ class EditJsonActivity: AppCompatActivity() {
             "com.alexsci.android.lambdarunner.ui.edit_json.lambda_client_builder"
         const val EXTRA_LAMBDA_FUNCTION_NAME=
             "com.alexsci.android.lambdarunner.ui.edit_json.lambda_function_name"
-        const val LOG_TAG = "EditJsonActivity"
+
+        const val BUNDLE_SAVED_JSON = "json"
     }
 
     private lateinit var recyclerView: RecyclerView
@@ -49,10 +50,10 @@ class EditJsonActivity: AppCompatActivity() {
             adapter = viewAdapter
         }
 
-        findViewById<Button>(R.id.done_button).also {button ->
+        findViewById<Button>(R.id.done_button).also { button ->
             button.setOnClickListener {
                 val json = getJson()
-                setResult(Activity.RESULT_OK, Intent(ACTION_SEND).also {intent ->
+                setResult(Activity.RESULT_OK, Intent(ACTION_SEND).also { intent ->
                     intent.putExtra(EXTRA_TEXT, json)
                 })
                 Toast.makeText(this, json, Toast.LENGTH_LONG).show()
@@ -61,15 +62,61 @@ class EditJsonActivity: AppCompatActivity() {
         }
     }
 
-    override fun onStart() {
-        super.onStart()
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+
+        if (savedInstanceState != null) {
+            val json = savedInstanceState.getString(BUNDLE_SAVED_JSON)
+            if (json != null) {
+                val parser = JsonParser()
+                inflateJsonViewFromTree(parser.parse(json))
+            }
+        }
+    }
+
+    private fun inflateJsonViewFromTree(root: JsonElement, depth: Int = 0) {
+        if (root.isJsonObject) {
+            val obj = root.asJsonObject
+            viewAdapter.data.add(JsonObject(depth))
+            for (entry in obj.entrySet()) {
+                viewAdapter.data.add(JsonPropertyKey(entry.key, depth+1))
+                inflateJsonViewFromTree(entry.value, depth+1)
+            }
+            viewAdapter.data.add(JsonEndObject(depth))
+        } else if (root.isJsonArray) {
+            val arr = root.asJsonArray
+            viewAdapter.data.add(JsonArray(depth))
+            for (item in arr.iterator()) {
+                inflateJsonViewFromTree(item, depth+1)
+            }
+            viewAdapter.data.add(JsonEndArray(depth))
+        } else if (root.isJsonPrimitive) {
+            val primitive = root.asJsonPrimitive
+            if (primitive.isBoolean) {
+                viewAdapter.data.add(JsonBoolean(primitive.asBoolean, depth))
+            } else if (primitive.isNumber) {
+                viewAdapter.data.add(JsonNumber(primitive.asNumber.toDouble(), depth))
+            } else if (primitive.isString) {
+                viewAdapter.data.add(JsonString(primitive.asString, depth))
+            } else {
+                throw RuntimeException("Unexpected")
+            }
+        } else if (root.isJsonNull) {
+            viewAdapter.data.add(JsonNull(depth))
+        } else {
+            throw RuntimeException("Unexpected")
+        }
+    }
+
+    override fun onPostCreate(savedInstanceState: Bundle?) {
+        super.onPostCreate(savedInstanceState)
 
         if (viewAdapter.data.isEmpty()) {
             selectRootJsonType()
         }
     }
 
-    fun selectRootJsonType() {
+    private fun selectRootJsonType() {
         selectJsonTypeDialog(this, false).also {
             it.setButton(
                 DialogInterface.BUTTON_POSITIVE,
@@ -77,10 +124,8 @@ class EditJsonActivity: AppCompatActivity() {
             ) { dialog, _ ->
                 val alertDialog = dialog as AlertDialog
                 val listView = alertDialog.listView
-                val selected = listView.adapter.getItem(listView.checkedItemPosition) as String
 
-                Log.i(LOG_TAG, selected)
-                when (selected) {
+                when (listView.adapter.getItem(listView.checkedItemPosition) as String) {
                     JsonTypes.Object.name -> {
                         viewAdapter.data.add(JsonObject())
                         viewAdapter.data.add(JsonEndObject())
@@ -111,6 +156,12 @@ class EditJsonActivity: AppCompatActivity() {
         }.show()
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+
+        outState.putString(BUNDLE_SAVED_JSON, getJson())
+    }
+
     private fun getJson(): String {
         val stack = Stack<JsonElement>()
         val propertyStack = Stack<String>()
@@ -121,8 +172,9 @@ class EditJsonActivity: AppCompatActivity() {
 
             when (item.type) {
                 // Push containers onto the stacks
-                JsonTypes.Object -> stack.push(item.asJsonElement())
-                JsonTypes.Array -> stack.push(item.asJsonElement())
+                JsonTypes.Object, JsonTypes.Array -> stack.push(item.asJsonElement())
+
+                // Properties are added when the value is fully constructed
                 JsonTypes.PropertyKey -> propertyStack.push((item as JsonPropertyKey).key)
 
                 // When ending a container, pop it, and add it to the parent container
@@ -155,7 +207,7 @@ class EditJsonActivity: AppCompatActivity() {
                     if (parent.isJsonArray) {
                         parent.asJsonArray.add(element)
                     } else if (parent.isJsonObject) {
-                            parent.asJsonObject.add(propertyStack.pop(), element)
+                        parent.asJsonObject.add(propertyStack.pop(), element)
                     }
                 }
             }
@@ -198,13 +250,59 @@ internal class JsonAdapter: RecyclerView.Adapter<JsonViewHolder>() {
 
         val currentItem = data[position]
 
+        val spacer = holder.view.findViewById<View>(R.id.spacer)
+        if (spacer != null) {
+            spacer.layoutParams = RelativeLayout.LayoutParams(30*currentItem.depth, 0)
+        }
+
         when (currentItem.type) {
             JsonTypes.Object -> {
-                bindObjectView(holder, this)
+                holder.view.findViewById<ImageButton>(R.id.add_button).also { button ->
+                    button.setOnClickListener { view ->
+                        selectJsonTypeDialog(view.context, true).also {
+                            it.setButton(
+                                DialogInterface.BUTTON_POSITIVE,
+                                "Add"
+                            ) { dialog, _ ->
+                                val alertDialog = dialog as AlertDialog
+                                val listView = alertDialog.listView
+                                val selected = listView.adapter.getItem(listView.checkedItemPosition) as String
+                                val keyValue = it.findViewById<EditText>(R.id.key_value)!!.text.toString()
+
+                                // Add the property key
+                                val propertyKeyPos = holder.pos+1
+                                data.add(propertyKeyPos, JsonPropertyKey(keyValue, currentItem.depth+1))
+                                notifyItemInserted(propertyKeyPos)
+
+                                // Add the property value
+                                insertType(it, this, propertyKeyPos+1, selected, currentItem.depth+1)
+
+                                dialog.dismiss()
+                            }
+                        }.show()
+                    }
+                }
             }
 
             JsonTypes.Array -> {
-                bindArrayView(holder, this)
+                holder.view.findViewById<ImageButton>(R.id.add_button).also { button ->
+                    button.setOnClickListener { view ->
+                        selectJsonTypeDialog(view.context, false).also {
+                            it.setButton(
+                                DialogInterface.BUTTON_POSITIVE,
+                                "Add"
+                            ) { dialog, _ ->
+                                val alertDialog = dialog as AlertDialog
+                                val listView = alertDialog.listView
+                                val selected = listView.adapter.getItem(listView.checkedItemPosition) as String
+
+                                insertType(it, this, holder.pos+1, selected, currentItem.depth+1)
+
+                                dialog.dismiss()
+                            }
+                        }.show()
+                    }
+                }
             }
 
             JsonTypes.String -> {
@@ -255,9 +353,55 @@ internal class JsonAdapter: RecyclerView.Adapter<JsonViewHolder>() {
                 }
             }
 
-            JsonTypes.Null -> {}
-            JsonTypes.EndObject -> {}
-            JsonTypes.EndArray -> {}
+            JsonTypes.Null,
+            JsonTypes.EndObject,
+            JsonTypes.EndArray
+            -> {}
+        }
+    }
+
+    private fun insertType(
+        alertDialog: AlertDialog, adapter: JsonAdapter, insertPos: Int, name: String, depth: Int
+    ) {
+        when (name) {
+            JsonTypes.Object.name -> {
+                adapter.data.add(insertPos, JsonEndObject(depth))
+                adapter.notifyItemInserted(insertPos)
+
+                adapter.data.add(insertPos, JsonObject(depth))
+                adapter.notifyItemInserted(insertPos)
+            }
+
+            JsonTypes.Array.name -> {
+                adapter.data.add(insertPos, JsonEndArray(depth))
+                adapter.notifyItemInserted(insertPos)
+
+                adapter.data.add(insertPos, JsonArray(depth))
+                adapter.notifyItemInserted(insertPos)
+            }
+
+            JsonTypes.String.name -> {
+                val stringVal = alertDialog.findViewById<EditText>(R.id.string_value)!!.text.toString()
+                adapter.data.add(insertPos, JsonString(stringVal, depth))
+                adapter.notifyItemInserted(insertPos)
+            }
+
+            JsonTypes.Number.name -> {
+                val numberVal = alertDialog.findViewById<EditText>(R.id.number_value)!!.text.toString().toDouble()
+                adapter.data.add(insertPos, JsonNumber(numberVal, depth))
+                adapter.notifyItemInserted(insertPos)
+            }
+
+            JsonTypes.Boolean.name -> {
+                val booleanVal = alertDialog.findViewById<ToggleButton>(R.id.boolean_value)!!.isChecked
+                adapter.data.add(insertPos, JsonBoolean(booleanVal, depth))
+                adapter.notifyItemInserted(insertPos)
+            }
+
+            JsonTypes.Null.name -> {
+                adapter.data.add(insertPos, JsonNull(depth))
+                adapter.notifyItemInserted(insertPos)
+            }
         }
     }
 }

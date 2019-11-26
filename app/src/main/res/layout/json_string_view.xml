@@ -5,22 +5,19 @@
     android:layout_height="wrap_content"
     >
 
-    <ImageView
-        android:id="@+id/icon"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
+    <View
+        android:id="@+id/spacer"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:src="@drawable/format_quote_open"
-        android:background="#ddd"
-        android:scaleType="fitXY"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         />
 
     <EditText
         android:id="@+id/value"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_toRightOf="@+id/icon"
+        android:layout_toRightOf="@+id/spacer"
         android:text="Robert"
         android:textAppearance="@style/TextAppearance.AppCompat.Body2"
         android:padding="8dp"

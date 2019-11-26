@@ -1,12 +1,9 @@
 package com.alexsci.android.lambdarunner.ui.edit_json
 
 import android.content.Context
-import android.content.DialogInterface
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.EditText
-import android.widget.ImageButton
 import android.widget.ToggleButton
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isVisible
@@ -18,108 +15,12 @@ internal fun createObjectView(context: Context): View {
         .inflate(R.layout.json_object_view, null)!!
 }
 
-internal fun bindObjectView(viewHolder: JsonViewHolder, adapter: JsonAdapter) {
-    viewHolder.view.findViewById<ImageButton>(R.id.add_button).also { button ->
-        button.setOnClickListener { view ->
-            selectJsonTypeDialog(view.context, true).also {
-                it.setButton(
-                    DialogInterface.BUTTON_POSITIVE,
-                    "Add"
-                ) { dialog, _ ->
-                    val alertDialog = dialog as AlertDialog
-                    val listView = alertDialog.listView
-                    val selected = listView.adapter.getItem(listView.checkedItemPosition) as String
-                    val keyValue = it.findViewById<EditText>(R.id.key_value)!!.text.toString()
-
-                    Log.i(EditJsonActivity.LOG_TAG, selected)
-
-                    // Add the property key
-                    val propertyKeyPos = viewHolder.pos+1
-                    adapter.data.add(propertyKeyPos, JsonPropertyKey(keyValue))
-                    adapter.notifyItemInserted(propertyKeyPos)
-
-                    // Add the property value
-                    insertType(it, adapter, propertyKeyPos+1, selected)
-
-                    dialog.dismiss()
-                }
-            }.show()
-        }
-    }
-}
-
 internal fun createArrayView(context: Context): View {
     return LayoutInflater
         .from(context)
         .inflate(R.layout.json_array_view, null)!!
 }
 
-internal fun bindArrayView(viewHolder: JsonViewHolder, adapter: JsonAdapter) {
-    viewHolder.view.findViewById<ImageButton>(R.id.add_button).also { button ->
-        button.setOnClickListener { view ->
-            selectJsonTypeDialog(view.context, false).also {
-                it.setButton(
-                    DialogInterface.BUTTON_POSITIVE,
-                    "Add"
-                ) { dialog, _ ->
-                    val alertDialog = dialog as AlertDialog
-                    val listView = alertDialog.listView
-                    val selected = listView.adapter.getItem(listView.checkedItemPosition) as String
-
-                    Log.i(EditJsonActivity.LOG_TAG, selected)
-
-                    insertType(it, adapter, viewHolder.pos+1, selected)
-
-                    dialog.dismiss()
-                }
-            }.show()
-        }
-    }
-}
-
-internal fun insertType(alertDialog: AlertDialog, adapter: JsonAdapter, insertPos: Int, name: String) {
-    when (name) {
-        JsonTypes.Object.name -> {
-            adapter.data.add(insertPos, JsonEndObject())
-            adapter.notifyItemInserted(insertPos)
-
-            adapter.data.add(insertPos, JsonObject())
-            adapter.notifyItemInserted(insertPos)
-        }
-
-        JsonTypes.Array.name -> {
-            adapter.data.add(insertPos, JsonEndArray())
-            adapter.notifyItemInserted(insertPos)
-
-            adapter.data.add(insertPos, JsonArray())
-            adapter.notifyItemInserted(insertPos)
-        }
-
-        JsonTypes.String.name -> {
-            val stringVal = alertDialog.findViewById<EditText>(R.id.string_value)!!.text.toString()
-            adapter.data.add(insertPos, JsonString(stringVal))
-            adapter.notifyItemInserted(insertPos)
-        }
-
-        JsonTypes.Number.name -> {
-            val numberVal = alertDialog.findViewById<EditText>(R.id.number_value)!!.text.toString().toDouble()
-            adapter.data.add(insertPos, JsonNumber(numberVal))
-            adapter.notifyItemInserted(insertPos)
-        }
-
-        JsonTypes.Boolean.name -> {
-            val booleanVal = alertDialog.findViewById<ToggleButton>(R.id.boolean_value)!!.isChecked
-            adapter.data.add(insertPos, JsonBoolean(booleanVal))
-            adapter.notifyItemInserted(insertPos)
-        }
-
-        JsonTypes.Null.name -> {
-            adapter.data.add(insertPos, JsonNull())
-            adapter.notifyItemInserted(insertPos)
-        }
-    }
-
-}
 
 internal fun createStringView(context: Context): View {
     return LayoutInflater

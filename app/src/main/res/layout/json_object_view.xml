@@ -1,17 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="#aaa"
-    android:padding="5dp">
+    >
+
+    <View
+        android:id="@+id/spacer"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        />
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
+        android:layout_toRightOf="@+id/spacer"
         android:background="#ccc"
-        android:padding="10dp"
+        android:padding="4dp"
         >
 
         <ImageButton
@@ -33,8 +40,7 @@
             android:scaleType="fitXY"
             android:background="#ccc"
             />
-
     </RelativeLayout>
 
+</RelativeLayout>
 
-</LinearLayout>

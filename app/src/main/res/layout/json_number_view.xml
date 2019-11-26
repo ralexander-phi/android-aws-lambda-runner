@@ -3,30 +3,25 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="2dp"
-    android:background="#ccc"
     >
 
-    <ImageView
-        android:id="@+id/icon"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
+    <View
+        android:id="@+id/spacer"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:src="@drawable/ic__number"
-        android:scaleType="fitXY"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         />
 
     <EditText
         android:id="@+id/value"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_toRightOf="@+id/icon"
+        android:layout_toRightOf="@+id/spacer"
         android:layout_alignParentRight="true"
         android:text="42"
         android:textAppearance="@style/TextAppearance.AppCompat.Body2"
         android:padding="8dp"
         android:paddingStart="12dp"
         />
-
 </RelativeLayout>

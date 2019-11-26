@@ -5,12 +5,19 @@
     android:layout_height="wrap_content"
     >
 
-    <ImageView
-        android:id="@+id/icon"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
+    <View
+        android:id="@+id/spacer"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
+        />
+
+    <ImageView
+        android:id="@+id/icon"
+        android:layout_toRightOf="@+id/spacer"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
         android:src="@drawable/ic_null_black_18dp"
         android:background="#ddd"
         android:scaleType="fitXY"

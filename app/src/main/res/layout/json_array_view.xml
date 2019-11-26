@@ -1,21 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="#aaa"
-    android:padding="5dp"
     >
+
+    <View
+        android:id="@+id/spacer"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        />
 
     <RelativeLayout
         android:id="@+id/layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_toRightOf="@+id/spacer"
         android:orientation="vertical"
-        android:background="#ccc"
-        android:padding="10dp"
+        android:background="#aaa"
+        android:padding="5dp"
         >
 
         <RelativeLayout
@@ -30,7 +36,7 @@
                 android:layout_height="32dp"
                 android:layout_alignParentLeft="true"
                 android:src="@drawable/ic__code_brackets"
-                android:background="#ccc"
+                android:background="#aaa"
                 android:scaleType="fitXY"
                 />
 
@@ -41,22 +47,8 @@
                 android:layout_alignParentRight="true"
                 android:src="@drawable/plus_circle_outline"
                 android:scaleType="fitXY"
-                android:background="#ccc"
+                android:background="#aaa"
                 />
         </RelativeLayout>
-
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recycler_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/header"
-            android:background="#fff"
-            android:padding="2dp"
-            tools:listitem="@layout/json_number_view"
-            tools:itemCount="3"
-            >
-
-        </androidx.recyclerview.widget.RecyclerView>
     </RelativeLayout>
-</LinearLayout>
+</RelativeLayout>
