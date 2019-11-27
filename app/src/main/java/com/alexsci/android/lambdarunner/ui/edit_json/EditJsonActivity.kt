@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.DialogInterface
 import android.net.Uri
 import android.os.Bundle
-import android.provider.MediaStore
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
@@ -17,15 +16,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.alexsci.android.lambdarunner.R
 import com.google.gson.JsonElement
 import com.google.gson.JsonParser
-import java.io.*
 import java.util.*
 
 class EditJsonActivity: AppCompatActivity() {
     companion object {
-        const val EXTRA_JSON_SCHEMA = "json_schema"
-        const val EXTRA_LAMBDA_CLIENT_BUILDER = "lambda_client_builder"
-        const val EXTRA_LAMBDA_FUNCTION_NAME = "lambda_function_name"
-
         const val BUNDLE_SAVED_JSON = "json"
     }
 

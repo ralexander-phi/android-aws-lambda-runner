@@ -1,6 +1,8 @@
 package com.alexsci.android.lambdarunner.aws.lambda
 
 import android.content.Context
+import android.os.Parcel
+import android.os.Parcelable
 import com.alexsci.android.lambdarunner.aws.base.*
 import com.alexsci.android.lambdarunner.util.crypto.KeyManagement
 import com.amazonaws.AmazonWebServiceResponse
@@ -89,14 +91,38 @@ class LambdaClient(
 }
 
 class LambdaClientBuilder(
-    private val region: String,
-    private val accessKey: String
-) : Serializable {
+    val region: String,
+    val accessKey: String
+) : Parcelable {
+    constructor(parcel: Parcel) : this(
+        parcel.readString()!!,
+        parcel.readString()!!
+    )
+
     fun getClient(context: Context) : LambdaClient {
         val secretKey = KeyManagement.getInstance(context).getKey(accessKey)
         val creds = BasicAWSCredentials(accessKey, secretKey)
         val credsProvider = StaticCredentialsProvider(creds)
         return LambdaClient(credsProvider, Region.getRegion(region))
+    }
+
+    override fun writeToParcel(parcel: Parcel, flags: Int) {
+        parcel.writeString(region)
+        parcel.writeString(accessKey)
+    }
+
+    override fun describeContents(): Int {
+        return 0
+    }
+
+    companion object CREATOR : Parcelable.Creator<LambdaClientBuilder> {
+        override fun createFromParcel(parcel: Parcel): LambdaClientBuilder {
+            return LambdaClientBuilder(parcel)
+        }
+
+        override fun newArray(size: Int): Array<LambdaClientBuilder?> {
+            return Array(size) { LambdaClientBuilder("", "")}
+        }
     }
 }
 

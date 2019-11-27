@@ -10,12 +10,11 @@ import com.alexsci.android.lambdarunner.data.list_functions.model.Function
 import com.alexsci.android.lambdarunner.ui.common.BaseArrayAdapter
 import com.alexsci.android.lambdarunner.ui.common.BaseListActivity
 import com.alexsci.android.lambdarunner.ui.common.ViewHolder
-import com.alexsci.android.lambdarunner.ui.edit_json.EditJsonActivity
 import com.alexsci.android.lambdarunner.ui.run_lambda.RunLambdaActivity
 
 class ListFunctionsActivity: BaseListActivity() {
     companion object {
-        const val EXTRA_ACCESS_KEY = "com.alexsci.android.lambdarunner.ui.list_functions.access_key"
+        const val EXTRA_ACCESS_KEY = "access_key"
     }
 
     private lateinit var listFunctionsViewModel: ListFunctionsViewModel
@@ -37,7 +36,7 @@ class ListFunctionsActivity: BaseListActivity() {
         this.title = "Functions"
 
         listFunctionsViewModel.listResult.observe(
-            this@ListFunctionsActivity,
+            this,
             FunctionListObserver()
         )
     }
@@ -82,9 +81,8 @@ class FunctionArrayAdapter(
 
         holder.run.setOnClickListener {
             val intent = Intent(context, RunLambdaActivity::class.java)
-            intent.putExtra(EditJsonActivity.EXTRA_JSON_SCHEMA, "{\"\$schema\": \"http://json-schema.org/schema#\", \"type\": \"object\", \"properties\": { \"name\": { \"type\": \"string\" } }, \"required\": [ \"name\" ] }")
-            intent.putExtra(EditJsonActivity.EXTRA_LAMBDA_CLIENT_BUILDER, clientBuilder)
-            intent.putExtra(EditJsonActivity.EXTRA_LAMBDA_FUNCTION_NAME, currentItem.functionName)
+            intent.putExtra(RunLambdaActivity.EXTRA_FUNCTION_NAME, currentItem.functionName)
+            intent.putExtra(RunLambdaActivity.EXTRA_LAMBDA_CLIENT_BUILDER, clientBuilder)
             context.startActivity(intent)
         }
 
