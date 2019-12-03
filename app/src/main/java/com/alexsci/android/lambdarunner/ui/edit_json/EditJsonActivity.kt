@@ -1,9 +1,7 @@
 package com.alexsci.android.lambdarunner.ui.edit_json
 
 import android.app.Activity
-import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -11,10 +9,13 @@ import androidx.appcompat.app.AppCompatActivity
 import com.alexsci.android.lambdarunner.R
 
 class EditJsonActivity: AppCompatActivity() {
+    companion object {
+        const val SAVED_STATE_JSON = "json"
+    }
+
     private lateinit var webView: WebView
 
-    private var editUri: Uri? = null
-
+    private var lastKnownJson: String? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -25,22 +26,46 @@ class EditJsonActivity: AppCompatActivity() {
         webView.addJavascriptInterface(WebAppInterface(), "Android")
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+
+        outState.putString(SAVED_STATE_JSON, lastKnownJson)
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+
+        lastKnownJson = savedInstanceState.getString(SAVED_STATE_JSON, "{}")
+    }
+
     override fun onPostCreate(savedInstanceState: Bundle?) {
         super.onPostCreate(savedInstanceState)
 
-        val json = "[1,2,3,4,null]"
-        webView.webViewClient = MyWebViewClient(json)
+        if (lastKnownJson == null) {
+            lastKnownJson = readJsonFromIntent()
+        }
+        webView.webViewClient = MyWebViewClient()
         webView.loadUrl("file:///android_asset/html/edit_json.html")
+    }
 
-        if (false) {
-            if (intent.data != null) {
-                editUri = intent.data
-
-                contentResolver.openInputStream(editUri!!)?.reader()?.buffered().use {
-                    val json = it?.readText()
-                    if (json != null) {
-                    }
+    private fun readJsonFromIntent(): String {
+        if (intent.data != null) {
+            contentResolver.openInputStream(intent.data!!)?.reader()?.buffered().use {
+                val text = it?.readText()
+                if (text != null) {
+                    return text
                 }
+            }
+        }
+
+        // Default to an empty object
+        return "{}"
+    }
+
+    private fun writeJsonToIntentData(json: String) {
+        if (intent.data != null) {
+            contentResolver.openOutputStream(intent.data!!)?.bufferedWriter().use {
+                it?.write(json)
             }
         }
     }
@@ -48,27 +73,24 @@ class EditJsonActivity: AppCompatActivity() {
     inner class WebAppInterface {
         @JavascriptInterface
         fun onResult(json: String) {
-            Log.i("RAA", json)
-            if (editUri != null) {
-                contentResolver.openOutputStream(editUri!!)?.bufferedWriter().use {
-                    it?.write(json)
-                }
-            }
+            writeJsonToIntentData(json)
             setResult(Activity.RESULT_OK)
             finish()
         }
-    }
-}
 
-class MyWebViewClient(
-    private val initialValue: String?
-) : WebViewClient() {
-    override fun onPageFinished(view: WebView, url: String) {
-        val initialValueEscaped = initialValue?.replace("\"", "\\\"")
-        val js = "init(\"$initialValueEscaped\");"
-        view.evaluateJavascript(js) {
-            Log.i("RAA", "init returned: $it")
+        @JavascriptInterface
+        fun onChangeText(json: String) {
+            lastKnownJson = json
         }
     }
+
+    inner class MyWebViewClient: WebViewClient() {
+        override fun onPageFinished(view: WebView, url: String) {
+            // XXX safe json set here!
+            val js = "editor.set($lastKnownJson);"
+            view.evaluateJavascript(js) {}
+        }
+    }
+
 }
 
