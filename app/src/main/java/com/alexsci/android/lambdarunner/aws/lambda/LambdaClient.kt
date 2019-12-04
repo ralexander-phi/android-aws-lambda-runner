@@ -91,38 +91,14 @@ class LambdaClient(
 }
 
 class LambdaClientBuilder(
-    val region: String,
-    val accessKey: String
-) : Parcelable {
-    constructor(parcel: Parcel) : this(
-        parcel.readString()!!,
-        parcel.readString()!!
-    )
-
+    private val accessKey: String,
+    private val region: String
+) {
     fun getClient(context: Context) : LambdaClient {
         val secretKey = KeyManagement.getInstance(context).getKey(accessKey)
         val creds = BasicAWSCredentials(accessKey, secretKey)
         val credsProvider = StaticCredentialsProvider(creds)
         return LambdaClient(credsProvider, Region.getRegion(region))
-    }
-
-    override fun writeToParcel(parcel: Parcel, flags: Int) {
-        parcel.writeString(region)
-        parcel.writeString(accessKey)
-    }
-
-    override fun describeContents(): Int {
-        return 0
-    }
-
-    companion object CREATOR : Parcelable.Creator<LambdaClientBuilder> {
-        override fun createFromParcel(parcel: Parcel): LambdaClientBuilder {
-            return LambdaClientBuilder(parcel)
-        }
-
-        override fun newArray(size: Int): Array<LambdaClientBuilder?> {
-            return Array(size) { LambdaClientBuilder("", "")}
-        }
     }
 }
 

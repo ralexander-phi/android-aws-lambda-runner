@@ -8,15 +8,15 @@
     <script src="app.min.js"></script>
 </head>
 <body>
-<div id="jsoneditor" style="width: 100%; height: 80%;"></div>
+    <div id="outer" style="display: flex; flex-flow: column; height: 100%">
+        <div id="jsoneditor" style="flex-grow: 1;"></div>
+    </div>
 
-<button id='submit'>Done</button>
 
-<script>
+    <script>
         // create the editor
         const container = document.getElementById("jsoneditor")
         const options = {
-            onChange: function() { Android.onChangeText(editor.getText()); },
             escapeUnicode: false,
             sortObjectKeys: true,
             history: true,
@@ -27,15 +27,11 @@
             enableTransform: true
         }
 
+        const editor = new JSONEditor(container, options);
+
         // TODO:
         // Add validation, and view for errors
         // Autocomplete
-
-        const editor = new JSONEditor(container, options)
-
-        document.getElementById("submit").addEventListener('click', function() {
-            Android.onResult(editor.getText());
-        })
     </script>
 </body>
 </html>

@@ -1,169 +1,108 @@
 package com.alexsci.android.lambdarunner.ui.run_lambda
 
-import android.app.Activity
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.os.AsyncTask
 import android.os.Bundle
-import android.os.Environment
+import android.view.MenuItem
+import android.webkit.JavascriptInterface
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import android.widget.Button
-import android.widget.EditText
-import android.widget.ImageButton
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.FileProvider
 import com.alexsci.android.lambdarunner.R
+import com.alexsci.android.lambdarunner.SHARED_PREFERENCE_ACCESS_KEY_ID
+import com.alexsci.android.lambdarunner.SHARED_PREFERENCE_FUNCTION_NAME
+import com.alexsci.android.lambdarunner.SHARED_PREFERENCE_REGION
 import com.alexsci.android.lambdarunner.aws.lambda.InvokeFunctionRequest
 import com.alexsci.android.lambdarunner.aws.lambda.InvokeFunctionResult
 import com.alexsci.android.lambdarunner.aws.lambda.LambdaClient
 import com.alexsci.android.lambdarunner.aws.lambda.LambdaClientBuilder
-import com.google.gson.GsonBuilder
-import com.google.gson.JsonParser
-import java.io.File
-import java.io.FileOutputStream
-import java.io.FileReader
+import com.alexsci.android.lambdarunner.ui.list_functions.ListFunctionsActivity
+import com.alexsci.android.lambdarunner.util.preferences.PreferencesUtil
 
 class RunLambdaActivity: AppCompatActivity() {
     companion object {
-        const val EDIT_JSON_REQUEST = 10
-
-        const val EXTRA_LAMBDA_CLIENT_BUILDER = "lambda_client_builder"
-        const val EXTRA_FUNCTION_NAME = "function_name"
+        const val SAVED_STATE_JSON = "json"
     }
 
-    private lateinit var lambdaClientBuilder: LambdaClientBuilder
-    private lateinit var functionName: String
+    private lateinit var webView: WebView
 
-    private lateinit var inputEditText: EditText
-    private lateinit var outputEditText: EditText
-    private lateinit var invokeButton: Button
-
-    private lateinit var jsonFile: File
-    private lateinit var jsonUri: Uri
-
-    private var prettyPrintJson = true
+    private var lastKnownJson: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        jsonFile = File(getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), "buffer.json")
-        jsonUri = FileProvider.getUriForFile(
-            this,
-            applicationContext.packageName + ".provider",
-            jsonFile)
-
         setContentView(R.layout.activity_run_lambda)
+        setSupportActionBar(findViewById(R.id.toolbar))
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        inputEditText = findViewById(R.id.input)!!
-        outputEditText = findViewById(R.id.output)
+        val preferences = PreferencesUtil(this)
+        val accessKeyId = preferences.get(SHARED_PREFERENCE_ACCESS_KEY_ID)
+        val region = preferences.get(SHARED_PREFERENCE_REGION)
+        val functionName = preferences.get(SHARED_PREFERENCE_FUNCTION_NAME)
 
-        lambdaClientBuilder = intent.getParcelableExtra(EXTRA_LAMBDA_CLIENT_BUILDER)
-        functionName = intent.getStringExtra(EXTRA_FUNCTION_NAME)!!
+        findViewById<TextView>(R.id.header)?.text = functionName
 
-        findViewById<TextView>(R.id.credential)!!.also {
-            it.text = lambdaClientBuilder.accessKey
-        }
-
-        findViewById<TextView>(R.id.function_name)!!.also {
-            it.text = functionName
-        }
-
-        findViewById<ImageButton>(R.id.edit_input)!!.also {
-            it.setOnClickListener {
-                editJson()
+        findViewById<Button>(R.id.invoke)?.setOnClickListener {
+            webView.evaluateJavascript("editor.get();") { jsonText ->
+                val request = InvokeFunctionRequest(functionName, jsonText)
+                val client = LambdaClientBuilder(accessKeyId, region).getClient(this@RunLambdaActivity)
+                InvokeTask(client, request).execute()
             }
         }
 
-        findViewById<Button>(R.id.input_paste_button)!!.also {
-            it.setOnClickListener {
-                val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                val primaryClip = clipboard.primaryClip
-                if (primaryClip != null && primaryClip.itemCount > 0) {
-                    val text = primaryClip.getItemAt(0).text
-                    if (text != null && text.isNotBlank()) {
-                        inputEditText.setText(text)
-                    }
-                }
-            }
-        }
+        webView = findViewById(R.id.webview)
+        webView.settings.javaScriptEnabled = true
+        webView.addJavascriptInterface(WebAppInterface(), "Android")
+    }
 
-        findViewById<ImageButton>(R.id.scan_qr)!!.also {
-            it.setOnClickListener {
-                // TODO
-            }
-        }
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
 
-        findViewById<ImageButton>(R.id.input_pretty_toggle)!!.also {
-            it.setOnClickListener {
-                prettyPrintJson = !prettyPrintJson
-                setInputText(inputEditText.text.toString())
-            }
-        }
+        outState.putString(SAVED_STATE_JSON, lastKnownJson)
+    }
 
-        invokeButton = findViewById<Button>(R.id.invoke_button)!!.also {
-            it.setOnClickListener {
-                val payload = inputEditText.text.toString()
-                val request = InvokeFunctionRequest(functionName, payload)
-                InvokeTask(
-                    lambdaClientBuilder.getClient(this),
-                    request
-                ).execute(null)
-            }
-        }
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
 
-        findViewById<Button>(R.id.copy_button)!!.also {
-            it.setOnClickListener {
-                val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                val clip = ClipData.newPlainText("json", outputEditText.text.toString())
-                clipboard.setPrimaryClip(clip)
+        lastKnownJson = savedInstanceState.getString(SAVED_STATE_JSON, "{}")
+    }
+
+    override fun onPostCreate(savedInstanceState: Bundle?) {
+        super.onPostCreate(savedInstanceState)
+
+        if (lastKnownJson == null) {
+            lastKnownJson = "{}"
+        }
+        webView.webViewClient = MyWebViewClient()
+        webView.loadUrl("file:///android_asset/html/edit_json.html")
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            android.R.id.home -> {
+                startActivity(Intent(this, ListFunctionsActivity::class.java))
+                true
             }
+
+            else -> super.onOptionsItemSelected(item)
         }
     }
 
-    private fun editJson() {
-        writeJsonBuffer(inputEditText.text.toString())
-
-        val intent = Intent(Intent.ACTION_EDIT)
-        intent.setDataAndType(jsonUri,"application/json")
-        startActivityForResult(intent, EDIT_JSON_REQUEST)
-    }
-
-    private fun writeJsonBuffer(json: String) {
-        // Ensure it's empty
-        jsonFile.delete()
-        jsonFile.createNewFile()
-        FileOutputStream(jsonFile).bufferedWriter().use {
-            it.write(json)
+    inner class WebAppInterface {
+        @JavascriptInterface
+        fun onChangeText(json: String) {
+            lastKnownJson = json
         }
     }
 
-    private fun setInputText(json: String?) {
-        if (json != null && json.isNotBlank()) {
-            val builder = GsonBuilder()
-            if (prettyPrintJson) {
-                builder.setPrettyPrinting()
-            }
-
-            val root = JsonParser().parse(json)
-
-            inputEditText.setText(builder.create().toJson(root))
-        } else {
-            inputEditText.setText("{}")
-        }
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if (requestCode == EDIT_JSON_REQUEST) {
-            if (resultCode == Activity.RESULT_OK) {
-                FileReader(jsonFile).buffered().use {
-                    setInputText(it.readText())
-                }
-            }
+    inner class MyWebViewClient: WebViewClient() {
+        override fun onPageFinished(view: WebView, url: String) {
+            // XXX safe json set here!
+            val js = "editor.set($lastKnownJson);"
+            view.evaluateJavascript(js) {}
         }
     }
 
@@ -171,19 +110,13 @@ class RunLambdaActivity: AppCompatActivity() {
         val client: LambdaClient,
         val request: InvokeFunctionRequest
     ): AsyncTask<Void, Void, InvokeFunctionResult>() {
-        override fun onPreExecute() {
-            super.onPreExecute()
-            invokeButton.isEnabled = false
-            outputEditText.setText("")
-        }
         override fun doInBackground(vararg params: Void?): InvokeFunctionResult {
             return client.invoke(request)
         }
 
         override fun onPostExecute(result: InvokeFunctionResult?) {
             super.onPostExecute(result)
-            outputEditText.setText(result?.payload)
-            invokeButton.isEnabled = true
+            Toast.makeText(this@RunLambdaActivity, result?.payload, Toast.LENGTH_LONG).show()
         }
     }
 }
