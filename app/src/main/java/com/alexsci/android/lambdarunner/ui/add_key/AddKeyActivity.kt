@@ -25,11 +25,14 @@ import android.widget.EditText
 import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.core.content.FileProvider
+import arrow.core.Either
 import com.alexsci.android.lambdarunner.BuildConfig
 
 import com.alexsci.android.lambdarunner.R
 import com.alexsci.android.lambdarunner.aws.iam.IamClient
 import com.alexsci.android.lambdarunner.util.crypto.*
+import com.amazonaws.AmazonClientException
+import com.amazonaws.AmazonServiceException
 import com.amazonaws.auth.BasicAWSCredentials
 import com.amazonaws.internal.StaticCredentialsProvider
 import com.google.android.gms.vision.Frame
@@ -243,8 +246,8 @@ class AddKeyActivity : AppCompatActivity() {
         Toast.makeText(applicationContext, errorString, Toast.LENGTH_SHORT).show()
     }
 
-    inner class SaveKeyTask: AsyncTask<SaveKeyTaskParams, Void, String>() {
-        override fun doInBackground(vararg params: SaveKeyTaskParams?): String {
+    inner class SaveKeyTask: AsyncTask<SaveKeyTaskParams, Void, Either<AmazonClientException, String>>() {
+        override fun doInBackground(vararg params: SaveKeyTaskParams?): Either<AmazonClientException, String> {
             assert(params.size == 1)
 
             val accessKey = params[0]!!.accessKey
@@ -255,18 +258,35 @@ class AddKeyActivity : AppCompatActivity() {
             val credProvider = StaticCredentialsProvider(creds)
 
             val iamClient = IamClient(credProvider)
-            val user = iamClient.getUser()
 
-            keyManagement.addKey(accessKey, user.getUserResult.user.userName, secretKey)
+            return when (val getUserResult = iamClient.getUser()) {
+                is Either.Left -> {
+                    Either.left(getUserResult.a)
+                }
+                is Either.Right -> {
+                    val username = getUserResult.b.getUserResult.user.userName
+                    keyManagement.addKey(accessKey, username, secretKey)
+                    Either.right(username)
+                }
+            }
 
-            return user.getUserResult.user.userName
         }
 
-        override fun onPostExecute(result: String) {
+        override fun onPostExecute(result: Either<AmazonClientException, String>) {
             super.onPostExecute(result)
 
-            setResult(Activity.RESULT_OK)
-            finish()
+            when (result) {
+                is Either.Left -> Toast.makeText(
+                    this@AddKeyActivity,
+                    result.a.toString(),
+                    Toast.LENGTH_LONG
+                ).show()
+
+                is Either.Right -> {
+                    setResult(Activity.RESULT_OK)
+                    finish()
+                }
+            }
         }
     }
 }

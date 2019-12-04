@@ -1,10 +1,9 @@
 package com.alexsci.android.lambdarunner.aws.iam
 
 import android.util.Log
+import arrow.core.Either
 import com.alexsci.android.lambdarunner.aws.base.*
-import com.amazonaws.AmazonWebServiceResponse
-import com.amazonaws.ClientConfiguration
-import com.amazonaws.DefaultRequest
+import com.amazonaws.*
 import com.amazonaws.auth.AWSCredentialsProvider
 import com.amazonaws.http.AmazonHttpClient
 import com.amazonaws.http.ExecutionContext
@@ -28,26 +27,32 @@ class IamClient(credProvider: AWSCredentialsProvider):
     /*
       See https://docs.aws.amazon.com/IAM/latest/APIReference/API_GetUser.html
      */
-    fun getUser(getUserRequest: GetUserRequest? = null) : GetUserResponse {
-        val getUserRequest = getUserRequest ?: GetUserRequest()
+    fun getUser(getUserRequest: GetUserRequest? = null) : Either<AmazonClientException, GetUserResponse> {
+        try {
+            val getUserRequest = getUserRequest ?: GetUserRequest()
 
-        val request = DefaultRequest<Void>("iam")
-        request.httpMethod = HttpMethodName.GET
-        // global endpoint
-        request.endpoint = URI.create("https://iam.amazonaws.com")
+            val request = DefaultRequest<Void>("iam")
+            request.httpMethod = HttpMethodName.GET
+            // global endpoint
+            request.endpoint = URI.create("https://iam.amazonaws.com")
 
-        request.addParameter("Action", getUserRequest.action)
-        request.addParameter("Version", getUserRequest.version)
-        request.addParameterIfNonNull("UserName", getUserRequest.username)
+            request.addParameter("Action", getUserRequest.action)
+            request.addParameter("Version", getUserRequest.version)
+            request.addParameterIfNonNull("UserName", getUserRequest.username)
 
-        sign(request)
+            sign(request)
 
-        val response = AmazonHttpClient(ClientConfiguration())
-            .execute(request,
-                GetUserResponseHandler(),
-                SimpleErrorHandler(), ExecutionContext())
+            val response = AmazonHttpClient(ClientConfiguration())
+                .execute(
+                    request,
+                    GetUserResponseHandler(),
+                    SimpleErrorHandler(), ExecutionContext()
+                )
 
-        return response.awsResponse
+            return Either.right(response.awsResponse)
+        } catch (e: AmazonClientException) {
+            return Either.left(e)
+        }
     }
 }
 

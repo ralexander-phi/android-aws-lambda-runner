@@ -12,24 +12,18 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import arrow.core.Either
-import arrow.core.k
-import arrow.core.success
 import com.alexsci.android.lambdarunner.R
 import com.alexsci.android.lambdarunner.SHARED_PREFERENCE_ACCESS_KEY_ID
 import com.alexsci.android.lambdarunner.SHARED_PREFERENCE_FUNCTION_NAME
 import com.alexsci.android.lambdarunner.SHARED_PREFERENCE_REGION
 import com.alexsci.android.lambdarunner.aws.RegionInfo
-import com.alexsci.android.lambdarunner.aws.lambda.LambdaClientBuilder
 import com.alexsci.android.lambdarunner.data.list_functions.model.Function
 import com.alexsci.android.lambdarunner.ui.common.BaseArrayAdapter
 import com.alexsci.android.lambdarunner.ui.common.ViewHolder
 import com.alexsci.android.lambdarunner.ui.list_keys.ListKeysActivity
 import com.alexsci.android.lambdarunner.ui.run_lambda.RunLambdaActivity
 import com.alexsci.android.lambdarunner.util.preferences.PreferencesUtil
-import com.amazonaws.regions.Region
-import com.amazonaws.regions.RegionUtils
 import com.amazonaws.regions.Regions
-import java.lang.Exception
 
 class ListFunctionsActivity: AppCompatActivity() {
     private lateinit var loadingProgressBar: ProgressBar

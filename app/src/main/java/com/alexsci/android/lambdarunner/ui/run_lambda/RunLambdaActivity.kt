@@ -11,6 +11,7 @@ import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import arrow.core.Either
 import com.alexsci.android.lambdarunner.R
 import com.alexsci.android.lambdarunner.SHARED_PREFERENCE_ACCESS_KEY_ID
 import com.alexsci.android.lambdarunner.SHARED_PREFERENCE_FUNCTION_NAME
@@ -21,6 +22,7 @@ import com.alexsci.android.lambdarunner.aws.lambda.LambdaClient
 import com.alexsci.android.lambdarunner.aws.lambda.LambdaClientBuilder
 import com.alexsci.android.lambdarunner.ui.list_functions.ListFunctionsActivity
 import com.alexsci.android.lambdarunner.util.preferences.PreferencesUtil
+import com.amazonaws.AmazonClientException
 
 class RunLambdaActivity: AppCompatActivity() {
     companion object {
@@ -109,14 +111,21 @@ class RunLambdaActivity: AppCompatActivity() {
     private inner class InvokeTask(
         val client: LambdaClient,
         val request: InvokeFunctionRequest
-    ): AsyncTask<Void, Void, InvokeFunctionResult>() {
-        override fun doInBackground(vararg params: Void?): InvokeFunctionResult {
+    ): AsyncTask<Void, Void, Either<AmazonClientException, InvokeFunctionResult>>() {
+        override fun doInBackground(vararg params: Void?): Either<AmazonClientException, InvokeFunctionResult> {
             return client.invoke(request)
         }
 
-        override fun onPostExecute(result: InvokeFunctionResult?) {
+        override fun onPostExecute(result: Either<AmazonClientException, InvokeFunctionResult>?) {
             super.onPostExecute(result)
-            Toast.makeText(this@RunLambdaActivity, result?.payload, Toast.LENGTH_LONG).show()
+
+            when (result) {
+                is Either.Left ->
+                    Toast.makeText(this@RunLambdaActivity, result?.a.toString(), Toast.LENGTH_LONG).show()
+
+                is Either.Right ->
+                    Toast.makeText(this@RunLambdaActivity, result?.b.payload, Toast.LENGTH_LONG).show()
+            }
         }
     }
 }

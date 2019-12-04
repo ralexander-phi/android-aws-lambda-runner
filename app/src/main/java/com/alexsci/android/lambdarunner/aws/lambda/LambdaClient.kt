@@ -3,8 +3,10 @@ package com.alexsci.android.lambdarunner.aws.lambda
 import android.content.Context
 import android.os.Parcel
 import android.os.Parcelable
+import arrow.core.Either
 import com.alexsci.android.lambdarunner.aws.base.*
 import com.alexsci.android.lambdarunner.util.crypto.KeyManagement
+import com.amazonaws.AmazonClientException
 import com.amazonaws.AmazonWebServiceResponse
 import com.amazonaws.ClientConfiguration
 import com.amazonaws.DefaultRequest
@@ -38,55 +40,64 @@ class LambdaClient(
     /*
       See: https://docs.aws.amazon.com/lambda/latest/dg/API_ListFunctions.html
      */
-    fun list(listRequest: ListFunctionsRequest) : ListFunctionsResult {
-        val request = DefaultRequest<Void>("lambda")
-        request.httpMethod = HttpMethodName.GET
-        request.endpoint = selectEndpoint(region, "/2015-03-31/functions/")
+    fun list(listRequest: ListFunctionsRequest): Either<AmazonClientException, ListFunctionsResult> {
+        try {
+            val request = DefaultRequest<Void>("lambda")
+            request.httpMethod = HttpMethodName.GET
+            request.endpoint = selectEndpoint(region, "/2015-03-31/functions/")
 
-        request.addParameter("FunctionVersion", listRequest.functionVersion)
-        request.addParameterIfNonNull("Marker", listRequest.marker)
-        request.addParameterIfNonNull("MasterRegion", listRequest.masterRegion)
-        request.addParameterIfNonNull("MaxItems", listRequest.maxItems?.toString())
+            request.addParameter("FunctionVersion", listRequest.functionVersion)
+            request.addParameterIfNonNull("Marker", listRequest.marker)
+            request.addParameterIfNonNull("MasterRegion", listRequest.masterRegion)
+            request.addParameterIfNonNull("MaxItems", listRequest.maxItems?.toString())
 
-        sign(request)
+            sign(request)
 
-        val response = AmazonHttpClient(ClientConfiguration())
-            .execute(request,
-                ListFunctionsResponseHandler(),
-                SimpleErrorHandler(), ExecutionContext()
-            )
+            val response = AmazonHttpClient(ClientConfiguration())
+                .execute(
+                    request,
+                    ListFunctionsResponseHandler(),
+                    SimpleErrorHandler(), ExecutionContext()
+                )
 
-        return response.awsResponse
+            return Either.right(response.awsResponse)
+        } catch (e: AmazonClientException) {
+            return Either.left(e)
+        }
     }
 
-    fun invoke(invokeRequest: InvokeFunctionRequest) : InvokeFunctionResult {
-        val request = DefaultRequest<Void>("lambda")
-        request.httpMethod = HttpMethodName.POST
-        request.endpoint = selectEndpoint(
-            region,
-            "/2015-03-31/functions/${invokeRequest.functionName}/invocations"
-        )
-
-        request.addParameterIfNonNull("Qualifier", invokeRequest.qualifier)
-        request.addHeaderIfNonNull("X-Amz-Invocation-Type", invokeRequest.invocationType)
-        request.addHeaderIfNonNull("X-Amz-Log-Type", invokeRequest.logType)
-        request.addHeaderIfNonNull("X-Amz-Client-Context", invokeRequest.clientContext)
-
-        val payloadStream = invokeRequest.payload.toByteArray(Charsets.UTF_8)
-        request.content = payloadStream.inputStream()
-        request.addHeader("Content-Length", payloadStream.size.toString())
-
-        sign(request)
-
-        val response = AmazonHttpClient(ClientConfiguration())
-            .execute(
-                request,
-                InvokeFunctionsResponseHandler(),
-                SimpleErrorHandler(),
-                ExecutionContext()
+    fun invoke(invokeRequest: InvokeFunctionRequest) : Either<AmazonClientException, InvokeFunctionResult> {
+        try {
+            val request = DefaultRequest<Void>("lambda")
+            request.httpMethod = HttpMethodName.POST
+            request.endpoint = selectEndpoint(
+                region,
+                "/2015-03-31/functions/${invokeRequest.functionName}/invocations"
             )
 
-        return response.awsResponse
+            request.addParameterIfNonNull("Qualifier", invokeRequest.qualifier)
+            request.addHeaderIfNonNull("X-Amz-Invocation-Type", invokeRequest.invocationType)
+            request.addHeaderIfNonNull("X-Amz-Log-Type", invokeRequest.logType)
+            request.addHeaderIfNonNull("X-Amz-Client-Context", invokeRequest.clientContext)
+
+            val payloadStream = invokeRequest.payload.toByteArray(Charsets.UTF_8)
+            request.content = payloadStream.inputStream()
+            request.addHeader("Content-Length", payloadStream.size.toString())
+
+            sign(request)
+
+            val response = AmazonHttpClient(ClientConfiguration())
+                .execute(
+                    request,
+                    InvokeFunctionsResponseHandler(),
+                    SimpleErrorHandler(),
+                    ExecutionContext()
+                )
+
+            return Either.right(response.awsResponse)
+        } catch (e: AmazonClientException) {
+            return Either.left(e)
+        }
     }
 }
 
@@ -126,7 +137,7 @@ class InvokeFunctionsResponseHandler : BaseResponseHandler<AmazonWebServiceRespo
         return AmazonWebServiceResponse<InvokeFunctionResult>().apply {
             result = InvokeFunctionResult(
                 executedVersion = response.headers["X-Amz-Executed-Version"]!!,
-                payload = responseContent!!,
+                payload = responseContent,
                 functionError = response.headers["X-Amz-Fuction-Error"],
                 logResult = response.headers["X-Amz-Log-Result"]
             )
