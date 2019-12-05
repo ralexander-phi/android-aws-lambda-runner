@@ -99,14 +99,7 @@ public class KeyManagement {
                             .setBlockModes(KEY_BLOCK_MODE)
                             .setEncryptionPaddings(KEY_PADDING);
 
-            /*
-             * TODO
-             * User must:
-             *  - Authenticate
-             *  - Confirm
-             *  - Be present
-             */
-            // TODO - Make this true
+            // Need to handle fingerprint, iris, intelligentScan not enrolled to enable this
             keyGenParameterSpecBuilder.setUserAuthenticationRequired(false);
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
