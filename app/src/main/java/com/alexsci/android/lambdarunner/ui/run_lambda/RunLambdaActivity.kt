@@ -116,7 +116,6 @@ class RunLambdaActivity: AppCompatActivity() {
 
     inner class MyWebViewClient: WebViewClient() {
         override fun onPageFinished(view: WebView, url: String) {
-            // XXX safe json set here!
             val js = "editor.set($lastKnownJson);"
             view.evaluateJavascript(js) {}
         }
