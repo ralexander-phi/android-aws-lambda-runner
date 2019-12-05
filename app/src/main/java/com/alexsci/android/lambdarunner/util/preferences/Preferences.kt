@@ -32,7 +32,6 @@ class PreferencesUtil(private val context: Context) {
             preferences.contains(name) -> preferences.getString(name, null)!!
 
             default != null -> {
-                // Also save the default
                 set(name, default)
                 default
             }
@@ -44,7 +43,28 @@ class PreferencesUtil(private val context: Context) {
         }
     }
 
+    /**
+     * Load boolean preferences from shared preferences
+     *
+     * If default is null - Launch the associated activity to select the preference
+     * If default is non-null - Set the default, and return it
+     */
+    fun getBoolean(name: String, default: Boolean): Boolean {
+        return when {
+            preferences.contains(name) -> preferences.getBoolean(name, false)
+
+            else -> {
+                setBoolean(name, default)
+                default
+            }
+        }
+    }
+
     fun set(name: String, value: String) {
         preferences.edit().putString(name, value).apply()
+    }
+
+    fun setBoolean(name: String, value: Boolean) {
+        preferences.edit().putBoolean(name, value).apply()
     }
 }

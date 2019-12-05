@@ -8,3 +8,6 @@ const val SHARED_PREFERENCE_ACCESS_KEY_ID = "AccessKeyId"
 const val SHARED_PREFERENCE_REGION = "Region"
 // Which Function to Invoke
 const val SHARED_PREFERENCE_FUNCTION_NAME = "FunctionName"
+
+// Application state
+const val SHARED_PREFERENCE_SHOW_QR_CODE_HELP = "ShowQRCodeHelp"

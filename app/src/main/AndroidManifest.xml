@@ -35,8 +35,8 @@
 
         <activity
             android:name=".ui.add_key.AddKeyActivity"
-            android:theme="@style/AppTheme"
-            android:label="Add AWS Credentials"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+            android:parentActivityName=".ui.list_keys.ListKeysActivity"
             />
 
         <activity

@@ -9,20 +9,23 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorPrimary"
-    android:keepScreenOn="true">
+    android:keepScreenOn="true"
+    >
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:layout_above="@id/add_button">
+        android:layout_above="@id/add_button"
+        >
 
         <ProgressBar
             android:id="@+id/loading"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:visibility="gone" />
+            android:visibility="gone"
+            />
 
         <TextView
             android:id="@+id/no_keys_message"
@@ -32,7 +35,8 @@
             android:text="No keys have been added"
             android:textStyle="bold"
             android:textAppearance="@style/TextAppearance.AppCompat.Title"
-            android:visibility="gone" />
+            android:visibility="gone"
+            />
 
         <androidx.recyclerview.widget.RecyclerView
             xmlns:android="http://schemas.android.com/apk/res/android"
@@ -48,7 +52,8 @@
             android:id="@+id/recycler_view"
             android:visibility="gone"
             tools:itemCount="1"
-            tools:listitem="@layout/list_item" />
+            tools:listitem="@layout/list_item"
+            />
 
     </RelativeLayout>
 
@@ -63,6 +68,7 @@
         android:layout_alignParentRight="true"
         app:fabSize="normal"
         app:borderWidth="0dp"
-        app:elevation="8dp"/>
+        app:elevation="8dp"
+        />
 
 </RelativeLayout>

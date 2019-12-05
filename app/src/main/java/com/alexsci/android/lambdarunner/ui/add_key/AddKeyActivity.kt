@@ -1,6 +1,7 @@
 package com.alexsci.android.lambdarunner.ui.add_key
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -18,19 +19,19 @@ import androidx.appcompat.app.AppCompatActivity
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
+import android.view.ContextThemeWrapper
 import android.view.View
 import android.view.inputmethod.EditorInfo
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ProgressBar
-import android.widget.Toast
+import android.widget.*
 import androidx.core.content.FileProvider
 import arrow.core.Either
 import com.alexsci.android.lambdarunner.BuildConfig
 
 import com.alexsci.android.lambdarunner.R
+import com.alexsci.android.lambdarunner.SHARED_PREFERENCE_SHOW_QR_CODE_HELP
 import com.alexsci.android.lambdarunner.aws.iam.IamClient
 import com.alexsci.android.lambdarunner.util.crypto.*
+import com.alexsci.android.lambdarunner.util.preferences.PreferencesUtil
 import com.amazonaws.AmazonClientException
 import com.amazonaws.AmazonServiceException
 import com.amazonaws.auth.BasicAWSCredentials
@@ -57,6 +58,8 @@ class AddKeyActivity : AppCompatActivity() {
     private lateinit var accessKeyIdEditText: EditText
     private lateinit var secretAccessKeyEditText: EditText
 
+    private lateinit var preferencesUtil: PreferencesUtil
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -65,6 +68,8 @@ class AddKeyActivity : AppCompatActivity() {
             .build()
 
         setContentView(R.layout.activity_add_key)
+        setSupportActionBar(findViewById(R.id.toolbar))
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         accessKeyIdEditText = findViewById(R.id.access_key_id)
         secretAccessKeyEditText = findViewById(R.id.secret_access_key)
@@ -72,6 +77,8 @@ class AddKeyActivity : AppCompatActivity() {
         val loginButton = findViewById<Button>(R.id.login)
         val scanQrButton = findViewById<Button>(R.id.scan_qr)
         val loading = findViewById<ProgressBar>(R.id.loading)
+
+        preferencesUtil = PreferencesUtil(this)
 
         loginViewModel = ViewModelProviders.of(this,
             LoginViewModelFactory()
@@ -147,12 +154,41 @@ class AddKeyActivity : AppCompatActivity() {
 
             if (canTakePicture()) {
                 scanQrButton.setOnClickListener {
-                    takePicture()
+                    val showHint = preferencesUtil.getBoolean(SHARED_PREFERENCE_SHOW_QR_CODE_HELP, true)
+
+                    if (showHint) {
+                        showQRCodeHint()
+                    } else {
+                        takePicture()
+                    }
                 }
             } else {
                 scanQrButton.visibility = View.GONE
             }
         }
+    }
+
+    private fun showQRCodeHint() {
+        val builder = AlertDialog.Builder(ContextThemeWrapper(this, R.style.Theme_MaterialComponents_Dialog))
+        val view = layoutInflater.inflate(R.layout.qr_code_help_view, null)
+        builder.setView(view)
+        builder.setMessage("Load credentials via QR code")
+        builder.setPositiveButton("Continue") { dialog, _ ->
+            val showHelp = view.findViewById<Switch>(R.id.show_help).isChecked
+            if (!showHelp) {
+                preferencesUtil.setBoolean(SHARED_PREFERENCE_SHOW_QR_CODE_HELP, false)
+            }
+            dialog.dismiss()
+            takePicture()
+        }
+        builder.setNegativeButton("Cancel") { dialog, _ ->
+            val showHelp = view.findViewById<Switch>(R.id.show_help).isChecked
+            if (!showHelp) {
+                preferencesUtil.setBoolean(SHARED_PREFERENCE_SHOW_QR_CODE_HELP, false)
+            }
+            dialog.dismiss()
+        }
+        builder.create().show()
     }
 
     private fun launchMediaScanIntent() {
