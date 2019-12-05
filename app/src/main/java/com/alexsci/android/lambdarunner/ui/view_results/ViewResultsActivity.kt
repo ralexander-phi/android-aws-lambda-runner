@@ -3,12 +3,17 @@ package com.alexsci.android.lambdarunner.ui.view_results
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.alexsci.android.lambdarunner.R
+import com.alexsci.android.lambdarunner.ui.common.ToolbarHelper
+import com.alexsci.android.lambdarunner.ui.list_functions.ListFunctionsActivity
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonParser
 
@@ -38,4 +43,19 @@ class ViewResultsActivity: AppCompatActivity() {
             Toast.makeText(this, "Copied", Toast.LENGTH_SHORT).show()
         }
     }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.main_menu, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        val toolbarResult = ToolbarHelper().onOptionsItemSelected(this, item)
+        return if (toolbarResult != null) {
+            toolbarResult
+        } else {
+            super.onOptionsItemSelected(item)
+        }
+    }
 }
+

@@ -3,6 +3,7 @@ package com.alexsci.android.lambdarunner.ui.run_lambda
 import android.content.Intent
 import android.os.AsyncTask
 import android.os.Bundle
+import android.view.Menu
 import android.view.MenuItem
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
@@ -21,6 +22,7 @@ import com.alexsci.android.lambdarunner.aws.lambda.InvokeFunctionRequest
 import com.alexsci.android.lambdarunner.aws.lambda.InvokeFunctionResult
 import com.alexsci.android.lambdarunner.aws.lambda.LambdaClient
 import com.alexsci.android.lambdarunner.aws.lambda.LambdaClientBuilder
+import com.alexsci.android.lambdarunner.ui.common.ToolbarHelper
 import com.alexsci.android.lambdarunner.ui.list_functions.ListFunctionsActivity
 import com.alexsci.android.lambdarunner.ui.view_results.ViewResultsActivity
 import com.alexsci.android.lambdarunner.util.preferences.PreferencesUtil
@@ -85,14 +87,24 @@ class RunLambdaActivity: AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            android.R.id.home -> {
-                startActivity(Intent(this, ListFunctionsActivity::class.java))
-                true
-            }
+        val toolbarResult = ToolbarHelper().onOptionsItemSelected(this, item)
+        return if (toolbarResult != null) {
+            toolbarResult
+        } else {
+            when (item.itemId) {
+                android.R.id.home -> {
+                    startActivity(Intent(this, ListFunctionsActivity::class.java))
+                    true
+                }
 
-            else -> super.onOptionsItemSelected(item)
+                else -> super.onOptionsItemSelected(item)
+            }
         }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.main_menu, menu)
+        return true
     }
 
     inner class WebAppInterface {

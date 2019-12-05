@@ -2,6 +2,7 @@ package com.alexsci.android.lambdarunner.ui.list_functions
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.*
@@ -19,6 +20,7 @@ import com.alexsci.android.lambdarunner.SHARED_PREFERENCE_REGION
 import com.alexsci.android.lambdarunner.aws.RegionInfo
 import com.alexsci.android.lambdarunner.data.list_functions.model.Function
 import com.alexsci.android.lambdarunner.ui.common.BaseArrayAdapter
+import com.alexsci.android.lambdarunner.ui.common.ToolbarHelper
 import com.alexsci.android.lambdarunner.ui.common.ViewHolder
 import com.alexsci.android.lambdarunner.ui.list_keys.ListKeysActivity
 import com.alexsci.android.lambdarunner.ui.run_lambda.RunLambdaActivity
@@ -65,6 +67,12 @@ class ListFunctionsActivity: AppCompatActivity() {
             FunctionListObserver()
         )
     }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.main_menu, menu)
+        return true
+    }
+
 
     private fun setupRegionSpinners() {
         val regionGroupSpinner = findViewById<Spinner>(R.id.region_group)
@@ -119,13 +127,18 @@ class ListFunctionsActivity: AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            android.R.id.home -> {
-                startActivity(Intent(this, ListKeysActivity::class.java))
-                true
-            }
+        val toolbarResult = ToolbarHelper().onOptionsItemSelected(this, item)
+        return if (toolbarResult != null) {
+            toolbarResult
+        } else {
+            return when (item.itemId) {
+                android.R.id.home -> {
+                    startActivity(Intent(this, ListKeysActivity::class.java))
+                    true
+                }
 
-            else -> super.onOptionsItemSelected(item)
+                else -> super.onOptionsItemSelected(item)
+            }
         }
     }
 

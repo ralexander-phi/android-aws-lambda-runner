@@ -20,6 +20,8 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
 import android.view.ContextThemeWrapper
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.*
@@ -30,6 +32,7 @@ import com.alexsci.android.lambdarunner.BuildConfig
 import com.alexsci.android.lambdarunner.R
 import com.alexsci.android.lambdarunner.SHARED_PREFERENCE_SHOW_QR_CODE_HELP
 import com.alexsci.android.lambdarunner.aws.iam.IamClient
+import com.alexsci.android.lambdarunner.ui.common.ToolbarHelper
 import com.alexsci.android.lambdarunner.util.crypto.*
 import com.alexsci.android.lambdarunner.util.preferences.PreferencesUtil
 import com.amazonaws.AmazonClientException
@@ -165,6 +168,20 @@ class AddKeyActivity : AppCompatActivity() {
             } else {
                 scanQrButton.visibility = View.GONE
             }
+        }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.main_menu, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        val toolbarResult = ToolbarHelper().onOptionsItemSelected(this, item)
+        return if (toolbarResult != null) {
+            toolbarResult
+        } else {
+            super.onOptionsItemSelected(item)
         }
     }
 

@@ -2,6 +2,8 @@ package com.alexsci.android.lambdarunner.ui.list_keys
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProviders
 import com.alexsci.android.lambdarunner.R
@@ -10,6 +12,7 @@ import com.alexsci.android.lambdarunner.data.list_keys.model.Key
 import com.alexsci.android.lambdarunner.ui.add_key.AddKeyActivity
 import com.alexsci.android.lambdarunner.ui.common.BaseArrayAdapter
 import com.alexsci.android.lambdarunner.ui.common.BaseListActivity
+import com.alexsci.android.lambdarunner.ui.common.ToolbarHelper
 import com.alexsci.android.lambdarunner.ui.common.ViewHolder
 import com.alexsci.android.lambdarunner.ui.list_functions.ListFunctionsActivity
 import com.alexsci.android.lambdarunner.util.crypto.KeyManagement
@@ -48,6 +51,20 @@ class ListKeysActivity: BaseListActivity() {
 
         // Start showing the list
         listKeysViewModel.list()
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.main_menu, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        val toolbarResult = ToolbarHelper().onOptionsItemSelected(this, item)
+        return if (toolbarResult != null) {
+            toolbarResult
+        } else {
+            super.onOptionsItemSelected(item)
+        }
     }
 
     inner class KeyListObserver : BaseListObserver<ListKeysResult>() {
