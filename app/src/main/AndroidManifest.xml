@@ -19,6 +19,7 @@
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher_crayfish"
         android:supportsRtl="true"
+        android:theme="@style/Theme.AppCompat.NoActionBar"
         tools:ignore="GoogleAppIndexingWarning"
         >
 
@@ -29,26 +30,22 @@
 
         <activity
             android:name=".ui.list_keys.ListKeysActivity"
-            android:theme="@style/AppTheme"
             android:label="Select AWS Credentials"
             />
 
         <activity
             android:name=".ui.add_key.AddKeyActivity"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
             android:parentActivityName=".ui.list_keys.ListKeysActivity"
             />
 
         <activity
             android:name=".ui.list_functions.ListFunctionsActivity"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
             android:parentActivityName=".ui.list_keys.ListKeysActivity"
-            android:label="Select a function"
+            android:label="Select a Function"
             />
 
         <activity
             android:name=".ui.run_lambda.RunLambdaActivity"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
             android:label="Function Runner"
             android:parentActivityName=".ui.list_functions.ListFunctionsActivity"
             >
@@ -60,7 +57,6 @@
 
         <activity
             android:name=".ui.view_results.ViewResultsActivity"
-            android:theme="@style/AppTheme"
             android:label="Result"
             android:parentActivityName=".ui.run_lambda.RunLambdaActivity"
             />
@@ -75,6 +71,7 @@
                 <data android:mimeType="application/json" />
             </intent-filter>
         </activity>
+        -->
 
         <provider
             android:name="androidx.core.content.FileProvider"
@@ -85,7 +82,6 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/provider_paths"/>
         </provider>
-        -->
     </application>
 
 </manifest>

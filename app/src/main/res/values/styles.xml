@@ -1,11 +1,15 @@
 <resources>
-
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
-        <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+    <style name="PrimaryButton" parent="Theme.AppCompat">
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorButtonNormal">@color/colorAccent</item>
+        <item name="colorControlHighlight">@color/colorControlHighlight</item>
     </style>
 
+    <style name="Toolbar" parent="Theme.AppCompat">
+    </style>
+
+    <style name="Card" parent="Theme.AppCompat">
+        <item name="android:background">@color/colorRaisedSurface</item>
+    </style>
 </resources>

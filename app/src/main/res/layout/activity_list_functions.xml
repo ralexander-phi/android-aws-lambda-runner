@@ -2,22 +2,17 @@
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/expandedListItem"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorPrimary"
     >
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/colorPrimary"
-        android:elevation="4dp"
-        android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
-        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+        android:theme="@style/Toolbar"
         />
 
     <RelativeLayout
@@ -34,7 +29,6 @@
             android:layout_alignParentTop="true"
             android:layout_alignParentLeft="true"
             android:text="Region:"
-            android:textAppearance="@style/TextAppearance.AppCompat.Title"
             />
 
         <Spinner
@@ -44,8 +38,6 @@
             android:layout_below="@+id/region_textview"
             android:layout_alignParentLeft="true"
             android:layout_margin="20dp"
-            android:elevation="-4dp"
-            android:background="#fff"
             android:padding="10dp"
             />
 
@@ -56,8 +48,6 @@
             android:layout_below="@+id/region_textview"
             android:layout_toRightOf="@+id/region_group"
             android:layout_margin="20dp"
-            android:elevation="-4dp"
-            android:background="#fff"
             android:padding="10dp"
             />
 
@@ -68,7 +58,6 @@
             android:layout_below="@+id/region_group"
             android:layout_alignParentLeft="true"
             android:text="Available Functions:"
-            android:textAppearance="@style/TextAppearance.AppCompat.Title"
             />
 
         <RelativeLayout
@@ -83,7 +72,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
-                android:visibility="gone" />
+                android:visibility="gone"
+                />
 
             <TextView
                 android:id="@+id/no_keys_message"
@@ -91,25 +81,22 @@
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
                 android:text="No functions found"
-                android:textStyle="bold"
-                android:textAppearance="@style/TextAppearance.AppCompat.Title"
-                android:visibility="gone" />
+                android:visibility="gone"
+                />
 
             <androidx.recyclerview.widget.RecyclerView
-                xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:tools="http://schemas.android.com/tools"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="20dp"
                 android:layout_marginEnd="20dp"
                 android:layout_marginBottom="32dp"
                 android:layout_marginTop="32dp"
-                android:background="@color/cardview_light_background"
                 android:orientation="vertical"
                 android:id="@+id/recycler_view"
                 android:visibility="gone"
                 tools:itemCount="1"
-                tools:listitem="@layout/list_item" />
+                tools:listitem="@layout/list_item"
+                />
 
         </RelativeLayout>
     </RelativeLayout>

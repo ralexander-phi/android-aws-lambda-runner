@@ -21,6 +21,7 @@ abstract class BaseListActivity: AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_list_items)
+        setSupportActionBar(findViewById(R.id.toolbar))
 
         loadingProgressBar = findViewById(R.id.loading)
         noKeysMessage = findViewById(R.id.no_keys_message)

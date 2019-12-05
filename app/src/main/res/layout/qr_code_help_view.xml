@@ -5,32 +5,37 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="10dp"
-    style="@style/Theme.MaterialComponents.Light.Dialog"
     >
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="10dp"
-        android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
         android:text="Create a QR code that contains you access AWS access key ID and secret access key separated by a new line.\n\n\
 If you use an online generator, make sure you trust it."
-        android:background="#eee"
+        style="@style/Card"
         />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:text="Show help text next time?"
-            />
-
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_margin="10dp"
+        >
         <Switch
             android:id="@+id/show_help"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
+            android:layout_alignParentStart="true"
             android:checked="true"
             />
-
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@+id/show_help"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="10dp"
+            android:text="Show help text next time?"
+            />
+    </RelativeLayout>
 </LinearLayout>

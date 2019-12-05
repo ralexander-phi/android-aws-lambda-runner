@@ -30,7 +30,7 @@ class ListKeysActivity: BaseListActivity() {
             ListKeysViewModelFactory(KeyManagement.getInstance(this))
         ).get(ListKeysViewModel::class.java)
 
-        this.title = "AWS Credentials"
+        this.title = "Select AWS Credential"
 
         addButton.setOnClickListener {
             val intent = Intent(this.baseContext, AddKeyActivity::class.java)

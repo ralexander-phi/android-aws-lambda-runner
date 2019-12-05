@@ -169,7 +169,7 @@ class AddKeyActivity : AppCompatActivity() {
     }
 
     private fun showQRCodeHint() {
-        val builder = AlertDialog.Builder(ContextThemeWrapper(this, R.style.Theme_MaterialComponents_Dialog))
+        val builder = AlertDialog.Builder(this)
         val view = layoutInflater.inflate(R.layout.qr_code_help_view, null)
         builder.setView(view)
         builder.setMessage("Load credentials via QR code")

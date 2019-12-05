@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:theme="@style/AppTheme"
     >
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/colorPrimary"
         android:elevation="4dp"
         app:title="Add AWS Credential"
+        android:theme="@style/Toolbar"
         />
 
     <LinearLayout
@@ -22,7 +22,6 @@
         android:layout_below="@+id/toolbar"
         android:weightSum="3"
         android:orientation="vertical"
-        android:background="@color/colorPrimary"
         >
 
         <!-- spacer -->
@@ -53,12 +52,10 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentTop="true"
                 android:layout_margin="10dp"
-
                 android:hint="@string/prompt_access_key_id"
                 android:inputType="text"
                 android:padding="10dp"
                 android:selectAllOnFocus="true"
-                android:background="#fff"
                 />
 
             <EditText
@@ -75,7 +72,6 @@
                 android:inputType="textPassword"
                 android:padding="10dp"
                 android:selectAllOnFocus="true"
-                android:background="#fff"
                 />
 
             <RelativeLayout
@@ -105,6 +101,7 @@
                     android:text="@string/action_sign_in"
                     android:drawablePadding="10dp"
                     android:drawableLeft="@drawable/lock"
+                    android:theme="@style/PrimaryButton"
                     />
 
             </RelativeLayout>

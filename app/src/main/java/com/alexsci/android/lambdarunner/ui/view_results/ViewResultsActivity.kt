@@ -21,6 +21,8 @@ class ViewResultsActivity: AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_view_results)
+        setSupportActionBar(findViewById(R.id.toolbar))
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         val uglyJson = intent.getStringExtra(RESULT_JSON)
         val gson = GsonBuilder().setPrettyPrinting().create()
