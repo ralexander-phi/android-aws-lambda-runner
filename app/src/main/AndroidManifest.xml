@@ -58,6 +58,13 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".ui.view_results.ViewResultsActivity"
+            android:theme="@style/AppTheme"
+            android:label="Result"
+            android:parentActivityName=".ui.run_lambda.RunLambdaActivity"
+            />
+
         <!--
         <activity
             android:name=".ui.edit_json.EditJsonActivity"

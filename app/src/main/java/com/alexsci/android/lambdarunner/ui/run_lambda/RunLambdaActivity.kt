@@ -21,6 +21,7 @@ import com.alexsci.android.lambdarunner.aws.lambda.InvokeFunctionResult
 import com.alexsci.android.lambdarunner.aws.lambda.LambdaClient
 import com.alexsci.android.lambdarunner.aws.lambda.LambdaClientBuilder
 import com.alexsci.android.lambdarunner.ui.list_functions.ListFunctionsActivity
+import com.alexsci.android.lambdarunner.ui.view_results.ViewResultsActivity
 import com.alexsci.android.lambdarunner.util.preferences.PreferencesUtil
 import com.amazonaws.AmazonClientException
 
@@ -123,8 +124,11 @@ class RunLambdaActivity: AppCompatActivity() {
                 is Either.Left ->
                     Toast.makeText(this@RunLambdaActivity, result?.a.toString(), Toast.LENGTH_LONG).show()
 
-                is Either.Right ->
-                    Toast.makeText(this@RunLambdaActivity, result?.b.payload, Toast.LENGTH_LONG).show()
+                is Either.Right -> {
+                    val intent = Intent(this@RunLambdaActivity, ViewResultsActivity::class.java)
+                    intent.putExtra(ViewResultsActivity.RESULT_JSON, result?.b.payload)
+                    startActivity(intent)
+                }
             }
         }
     }
