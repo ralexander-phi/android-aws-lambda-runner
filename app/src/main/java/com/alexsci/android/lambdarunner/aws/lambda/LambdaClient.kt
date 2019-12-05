@@ -188,7 +188,7 @@ class ListFunctionsResponseHandler : BaseResponseHandler<AmazonWebServiceRespons
             functionsList.add(Function(
                 functionObject.get("FunctionName").asString,
                 functionObject.get("FunctionArn").asString,
-                functionObject.get("FunctionDescription")?.asString
+                functionObject.get("Description")?.asString
             ))
         }
 
