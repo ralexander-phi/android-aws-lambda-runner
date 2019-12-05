@@ -35,6 +35,7 @@
 
         <activity
             android:name=".ui.add_key.AddKeyActivity"
+            android:label="Add AWS Credential"
             android:parentActivityName=".ui.list_keys.ListKeysActivity"
             />
 
@@ -57,7 +58,7 @@
 
         <activity
             android:name=".ui.view_results.ViewResultsActivity"
-            android:label="Result"
+            android:label="View Result"
             android:parentActivityName=".ui.run_lambda.RunLambdaActivity"
             />
 
