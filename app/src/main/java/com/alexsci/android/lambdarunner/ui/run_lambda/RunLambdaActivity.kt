@@ -11,6 +11,7 @@ import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import arrow.core.Either
 import com.alexsci.android.lambdarunner.R
 import com.alexsci.android.lambdarunner.SHARED_PREFERENCE_ACCESS_KEY_ID
@@ -46,7 +47,7 @@ class RunLambdaActivity: AppCompatActivity() {
         val region = preferences.get(SHARED_PREFERENCE_REGION)
         val functionName = preferences.get(SHARED_PREFERENCE_FUNCTION_NAME)
 
-        findViewById<TextView>(R.id.header)?.text = functionName
+        findViewById<Toolbar>(R.id.toolbar)?.title = functionName
 
         findViewById<Button>(R.id.invoke)?.setOnClickListener {
             webView.evaluateJavascript("editor.get();") { jsonText ->

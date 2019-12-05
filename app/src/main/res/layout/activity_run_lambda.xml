@@ -4,33 +4,26 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorPrimary">
+    android:background="@color/colorPrimary"
+    >
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/colorPrimaryDark"
         android:elevation="4dp"
         android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+        app:title="Function Name"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-        />
-
-    <TextView
-        android:id="@+id/header"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/toolbar"
-        android:text="MyFunction"
-        android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
-        android:layout_margin="10dp"
+        app:titleTextAppearance="@style/TextAppearance.MaterialComponents.Headline5"
+        style="@style/Widget.AppCompat.Toolbar"
         />
 
     <WebView
         android:id="@+id/webview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/header"
+        android:layout_below="@+id/toolbar"
         android:layout_above="@+id/invoke"
         />
 
@@ -39,7 +32,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
+        android:layout_alignParentRight="true"
         android:layout_margin="15dp"
         android:elevation="10dp"
         android:drawableLeft="@drawable/lambda"
@@ -48,5 +41,4 @@
         android:text="Invoke"
         android:textAppearance="@style/TextAppearance.MaterialComponents.Button"
         />
-
 </RelativeLayout>
