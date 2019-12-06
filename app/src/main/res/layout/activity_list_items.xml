@@ -53,7 +53,7 @@
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/add_button"
-        android:src="@drawable/plus"
+        android:src="@drawable/account_plus"
         android:tint="#fff"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

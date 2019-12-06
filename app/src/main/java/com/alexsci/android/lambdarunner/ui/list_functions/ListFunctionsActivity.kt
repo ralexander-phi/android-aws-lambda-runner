@@ -197,6 +197,7 @@ class ListFunctionsActivity: AppCompatActivity() {
             holder.title.text = currentItem.functionName
             holder.description.text = currentItem.description
 
+            holder.run.setImageResource(R.drawable.arrow_right_bold)
             holder.run.setOnClickListener {
                 preferences.set(SHARED_PREFERENCE_FUNCTION_NAME, currentItem.functionName)
                 context.startActivity(Intent(context, RunLambdaActivity::class.java))

@@ -26,8 +26,10 @@
             android:textAppearance="@style/TextAppearance.AppCompat.Title"
             />
 
-        <Button
+        <ImageButton
             android:id="@+id/remove"
+            android:src="@drawable/account_remove"
+            android:tint="#fff"
             android:layout_width="wrap_content"
             android:layout_alignParentTop="true"
             android:layout_toStartOf="@+id/run"
@@ -35,8 +37,10 @@
             android:text="Remove"
             />
 
-        <Button
+        <ImageButton
             android:id="@+id/run"
+            android:src="@drawable/account_arrow_right"
+            android:tint="#fff"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
