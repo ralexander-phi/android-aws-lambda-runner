@@ -3,4 +3,5 @@
     <color name="colorAccent">#ff009688</color>
     <color name="colorControlHighlight">#33ffffff</color>
     <color name="colorRaisedSurface">#ff555555</color>
+    <color name="colorRaisedSurface2">#ff626262</color>
 </resources>

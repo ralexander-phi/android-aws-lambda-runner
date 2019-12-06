@@ -19,20 +19,6 @@ open class BaseArrayAdapter<T>(
 
     override fun onBindViewHolder(holder: ViewHolder<T>, position: Int) {
         holder.t = data[position]
-
-        // Start hidden
-        holder.description.visibility = View.GONE
-        holder.buttonPanel.visibility = View.GONE
-
-        holder.title.setOnClickListener {
-            if (holder.description.visibility == View.GONE) {
-                holder.description.visibility = View.VISIBLE
-                holder.buttonPanel.visibility = View.VISIBLE
-            } else {
-                holder.description.visibility = View.GONE
-                holder.buttonPanel.visibility = View.GONE
-            }
-        }
     }
 
     override fun getItemCount() = data.size

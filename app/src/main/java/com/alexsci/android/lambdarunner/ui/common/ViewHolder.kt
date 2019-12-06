@@ -15,5 +15,4 @@ class ViewHolder<T>(
     val description: TextView = view.findViewById(R.id.description)
     val remove: Button = view.findViewById(R.id.remove)
     val run: Button = view.findViewById(R.id.run)
-    val buttonPanel: LinearLayout = view.findViewById(R.id.buttonPanel)
 }

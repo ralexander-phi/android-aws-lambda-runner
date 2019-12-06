@@ -1,53 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
     style="@style/Card"
     >
 
-    <TextView
-        android:id="@+id/title"
+    <RelativeLayout
+        android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:text="Item name"
-        android:textAppearance="@style/TextAppearance.AppCompat.Title"
-        />
-
-    <TextView
-        android:id="@+id/description"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:text="Description"
-        />
-
-    <LinearLayout
-        android:id="@+id/buttonPanel"
-        android:orientation="horizontal"
-        android:layout_height="wrap_content"
-        android:layout_width="match_parent"
+        style="@style/CardHeader"
         >
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentStart="true"
+            android:layout_toStartOf="@+id/remove"
+            android:layout_margin="10dp"
+            android:text="Item name"
+            android:textAppearance="@style/TextAppearance.AppCompat.Title"
+            />
+
         <Button
             android:id="@+id/remove"
-            android:layout_width="0dp"
-            android:layout_weight="1"
+            android:layout_width="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_toStartOf="@+id/run"
             android:layout_height="wrap_content"
-            android:layout_margin="15dp"
             android:text="Remove"
             />
 
         <Button
             android:id="@+id/run"
-            android:layout_width="0dp"
-            android:layout_weight="1"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="15dp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
             android:text="Use"
             android:theme="@style/PrimaryButton"
             />
-    </LinearLayout>
-</LinearLayout>
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/description"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/header"
+        android:layout_margin="10dp"
+        android:text="Description"
+        />
+</RelativeLayout>

@@ -12,4 +12,8 @@
     <style name="Card" parent="Theme.AppCompat">
         <item name="android:background">@color/colorRaisedSurface</item>
     </style>
+
+    <style name="CardHeader" parent="Theme.AppCompat">
+        <item name="android:background">@color/colorRaisedSurface2</item>
+    </style>
 </resources>
