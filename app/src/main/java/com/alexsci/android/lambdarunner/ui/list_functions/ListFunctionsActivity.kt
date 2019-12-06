@@ -1,6 +1,7 @@
 package com.alexsci.android.lambdarunner.ui.list_functions
 
 import android.content.Intent
+import android.graphics.Rect
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -10,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import arrow.core.Either
@@ -21,6 +23,7 @@ import com.alexsci.android.lambdarunner.aws.RegionInfo
 import com.alexsci.android.lambdarunner.data.list_functions.model.Function
 import com.alexsci.android.lambdarunner.ui.common.BaseArrayAdapter
 import com.alexsci.android.lambdarunner.ui.common.ToolbarHelper
+import com.alexsci.android.lambdarunner.ui.common.VerticalSpaceItemDecorator
 import com.alexsci.android.lambdarunner.ui.common.ViewHolder
 import com.alexsci.android.lambdarunner.ui.list_keys.ListKeysActivity
 import com.alexsci.android.lambdarunner.ui.run_lambda.RunLambdaActivity
@@ -53,6 +56,7 @@ class ListFunctionsActivity: AppCompatActivity() {
         recyclerView = findViewById<RecyclerView>(R.id.recycler_view).apply {
             setHasFixedSize(true)
             layoutManager = LinearLayoutManager(this@ListFunctionsActivity)
+            addItemDecoration(VerticalSpaceItemDecorator())
         }
 
         setupRegionSpinners()

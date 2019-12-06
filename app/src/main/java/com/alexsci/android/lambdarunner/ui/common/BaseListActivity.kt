@@ -30,6 +30,7 @@ abstract class BaseListActivity: AppCompatActivity() {
         recyclerView = findViewById<RecyclerView>(R.id.recycler_view).apply {
             setHasFixedSize(false)
             layoutManager = LinearLayoutManager(this@BaseListActivity)
+            addItemDecoration(VerticalSpaceItemDecorator())
         }
     }
 
