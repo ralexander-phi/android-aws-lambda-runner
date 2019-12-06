@@ -1,5 +1,6 @@
 package com.alexsci.android.lambdarunner.ui.list_keys
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
@@ -105,7 +106,16 @@ class ListKeysActivity: BaseListActivity() {
             }
 
             holder.remove.setOnClickListener {
-                listKeysViewModel.remove(currentItem)
+                val builder = AlertDialog.Builder(this@ListKeysActivity)
+                builder.setMessage("Are you sure you want to remove ${holder.title.text}?")
+                builder.setPositiveButton("Remove") { dialog, _ ->
+                    listKeysViewModel.remove(currentItem)
+                    dialog.dismiss()
+                }
+                builder.setNegativeButton("Cancel") { dialog, _ ->
+                    dialog.cancel()
+                }
+                builder.create().show()
             }
         }
     }
