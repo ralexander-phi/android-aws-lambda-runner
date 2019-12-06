@@ -14,10 +14,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import arrow.core.Either
-import com.alexsci.android.lambdarunner.R
-import com.alexsci.android.lambdarunner.SHARED_PREFERENCE_ACCESS_KEY_ID
-import com.alexsci.android.lambdarunner.SHARED_PREFERENCE_FUNCTION_NAME
-import com.alexsci.android.lambdarunner.SHARED_PREFERENCE_REGION
+import com.alexsci.android.lambdarunner.*
 import com.alexsci.android.lambdarunner.aws.lambda.InvokeFunctionRequest
 import com.alexsci.android.lambdarunner.aws.lambda.InvokeFunctionResult
 import com.alexsci.android.lambdarunner.aws.lambda.LambdaClient
@@ -34,6 +31,7 @@ class RunLambdaActivity: AppCompatActivity() {
     }
 
     private lateinit var webView: WebView
+    private lateinit var preferencesUtil: PreferencesUtil
 
     private var lastKnownJson: String? = null
 
@@ -44,15 +42,16 @@ class RunLambdaActivity: AppCompatActivity() {
         setSupportActionBar(findViewById(R.id.toolbar))
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        val preferences = PreferencesUtil(this)
-        val accessKeyId = preferences.get(SHARED_PREFERENCE_ACCESS_KEY_ID)
-        val region = preferences.get(SHARED_PREFERENCE_REGION)
-        val functionName = preferences.get(SHARED_PREFERENCE_FUNCTION_NAME)
+        preferencesUtil = PreferencesUtil(this)
+        val accessKeyId = preferencesUtil.get(SHARED_PREFERENCE_ACCESS_KEY_ID)
+        val region = preferencesUtil.get(SHARED_PREFERENCE_REGION)
+        val functionName = preferencesUtil.get(SHARED_PREFERENCE_FUNCTION_NAME)
 
         findViewById<Toolbar>(R.id.toolbar)?.title = functionName
 
         findViewById<Button>(R.id.invoke)?.setOnClickListener {
             webView.evaluateJavascript("editor.get();") { jsonText ->
+                preferencesUtil.set(SHARED_PREFERENCE_LAST_USED_JSON, jsonText)
                 val request = InvokeFunctionRequest(functionName, jsonText)
                 val client = LambdaClientBuilder(accessKeyId, region).getClient(this@RunLambdaActivity)
                 InvokeTask(client, request).execute()
@@ -73,14 +72,14 @@ class RunLambdaActivity: AppCompatActivity() {
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
 
-        lastKnownJson = savedInstanceState.getString(SAVED_STATE_JSON, "{}")
+        lastKnownJson = savedInstanceState.getString(SAVED_STATE_JSON)
     }
 
     override fun onPostCreate(savedInstanceState: Bundle?) {
         super.onPostCreate(savedInstanceState)
 
         if (lastKnownJson == null) {
-            lastKnownJson = "{}"
+            lastKnownJson = preferencesUtil.get(SHARED_PREFERENCE_LAST_USED_JSON, "{}")
         }
         webView.webViewClient = MyWebViewClient()
         webView.loadUrl("file:///android_asset/html/edit_json.html")
