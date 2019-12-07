@@ -177,6 +177,7 @@ class ListFunctionsActivity: AppCompatActivity() {
             if (results.isEmpty()) {
                 recyclerView.isVisible = false
                 noKeysMessage.isVisible = true
+                noKeysMessage.text = "No functions found in region."
             } else {
                 recyclerView.isVisible = true
                 noKeysMessage.isVisible = false
