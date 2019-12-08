@@ -8,11 +8,21 @@ import android.net.Uri
 class DialogHelper {
 
     fun showAbout(context: Context) {
-        show(context, "TODO app name", "Open Website", "https://alexsci.com/android-apps/")
+        show(
+            context,
+            "AWS Lambda Invoker",
+            "Open Website",
+            "https://alexsci.com/android-apps/aws-lambda-invoker/"
+        )
     }
 
     fun showFeedback(context: Context) {
-        show(context, "Submit feedback", "Open Github", "https://www.github.com/")
+        show(
+            context,
+            "Submit feedback",
+            "Open Github",
+            "https://github.com/ralexander-phi/android-aws-lambda-runner/issues/new"
+        )
     }
 
     private fun show(context: Context, message: String, ok: String, url: String) {
