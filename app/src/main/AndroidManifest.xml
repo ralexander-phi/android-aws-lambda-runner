@@ -17,7 +17,8 @@
 
     <application
         android:allowBackup="false"
-        android:icon="@mipmap/ic_launcher_crayfish"
+        android:label="AWS Lambda Invoker"
+        android:icon="@mipmap/ic_launcher"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.NoActionBar"
         tools:ignore="GoogleAppIndexingWarning"
@@ -30,7 +31,7 @@
 
         <activity
             android:name=".ui.list_keys.ListKeysActivity"
-            android:label="Select AWS Credentials"
+            android:label="AWS Lambda Invoker"
             >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

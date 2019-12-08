@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import androidx.core.view.isVisible
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -16,6 +17,7 @@ abstract class BaseListActivity: AppCompatActivity() {
     protected lateinit var noKeysMessage: TextView
     protected lateinit var recyclerView: RecyclerView
     protected lateinit var addButton: FloatingActionButton
+    protected lateinit var toolbar: Toolbar
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,6 +25,7 @@ abstract class BaseListActivity: AppCompatActivity() {
         setContentView(R.layout.activity_list_items)
         setSupportActionBar(findViewById(R.id.toolbar))
 
+        toolbar = findViewById(R.id.toolbar)
         loadingProgressBar = findViewById(R.id.loading)
         noKeysMessage = findViewById(R.id.no_keys_message)
         addButton = findViewById(R.id.add_button)

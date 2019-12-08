@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import androidx.appcompat.widget.Toolbar
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProviders
 import com.alexsci.android.lambdarunner.R
@@ -34,7 +35,7 @@ class ListKeysActivity: BaseListActivity() {
             ListKeysViewModelFactory(KeyManagement.getInstance(this))
         ).get(ListKeysViewModel::class.java)
 
-        this.title = "Select AWS Credential"
+        toolbar?.title = "Select AWS Credential"
 
         addButton.setOnClickListener {
             val intent = Intent(this.baseContext, AddKeyActivity::class.java)
