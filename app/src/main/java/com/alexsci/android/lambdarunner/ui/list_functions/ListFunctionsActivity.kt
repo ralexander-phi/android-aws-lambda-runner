@@ -1,7 +1,6 @@
 package com.alexsci.android.lambdarunner.ui.list_functions
 
 import android.content.Intent
-import android.graphics.Rect
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -11,14 +10,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import arrow.core.Either
-import com.alexsci.android.lambdarunner.R
-import com.alexsci.android.lambdarunner.SHARED_PREFERENCE_ACCESS_KEY_ID
-import com.alexsci.android.lambdarunner.SHARED_PREFERENCE_FUNCTION_NAME
-import com.alexsci.android.lambdarunner.SHARED_PREFERENCE_REGION
+import arrow.core.ListK
+import com.alexsci.android.lambdarunner.*
 import com.alexsci.android.lambdarunner.aws.RegionInfo
 import com.alexsci.android.lambdarunner.data.list_functions.model.Function
 import com.alexsci.android.lambdarunner.ui.common.BaseArrayAdapter
@@ -37,14 +33,12 @@ class ListFunctionsActivity: AppCompatActivity() {
     private lateinit var listFunctionsViewModel: ListFunctionsViewModel
 
     private lateinit var preferences: PreferencesUtil
-    private lateinit var accessKeyId: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         // Load preferences, or launch activity to select them
         preferences = PreferencesUtil(this)
-        accessKeyId = preferences.get(SHARED_PREFERENCE_ACCESS_KEY_ID)
 
         setContentView(R.layout.activity_list_functions)
         setSupportActionBar(findViewById(R.id.toolbar))
@@ -82,10 +76,10 @@ class ListFunctionsActivity: AppCompatActivity() {
         val regionGroupSpinner = findViewById<Spinner>(R.id.region_group)
         val regionCodeSpinner = findViewById<Spinner>(R.id.region_code)
 
-        val selectedRegionCode =
-            preferences.get(SHARED_PREFERENCE_REGION, Regions.DEFAULT_REGION.getName())
+        // Get previous selection, or default values
+        val selectedRegionGroup =
+            preferences.get(SHARED_PREFERENCE_REGION_GROUP, "All Regions")
 
-        val selectedGroup = RegionInfo.groupForCode(selectedRegionCode)
         val regionGroupNames = RegionInfo.groups()
 
         regionGroupSpinner.adapter = ArrayAdapter<String>(
@@ -94,7 +88,7 @@ class ListFunctionsActivity: AppCompatActivity() {
             regionGroupNames
         )
 
-        regionGroupSpinner.setSelection(regionGroupNames.indexOf(selectedGroup))
+        regionGroupSpinner.setSelection(regionGroupNames.indexOf(selectedRegionGroup))
         regionGroupSpinner.onItemSelectedListener = object: AdapterView.OnItemSelectedListener {
             override fun onNothingSelected(parent: AdapterView<*>?) {}
 
@@ -105,12 +99,20 @@ class ListFunctionsActivity: AppCompatActivity() {
                 id: Long
             ) {
                 val selectedGroup = regionGroupNames[position]
+                preferences.set(SHARED_PREFERENCE_REGION_GROUP, selectedGroup)
                 val regionCodes = RegionInfo.regionCodesForRegionGroup(selectedGroup)
                 regionCodeSpinner.adapter = ArrayAdapter<String>(
                     this@ListFunctionsActivity,
                     android.R.layout.simple_spinner_item,
                     regionCodes
                 )
+
+                // If the region we previously had selected is in this group, keep it selected
+                val selectedRegionCode =
+                    preferences.get(SHARED_PREFERENCE_REGION, Regions.DEFAULT_REGION.getName())
+                if (regionCodes.contains(selectedRegionCode)) {
+                    regionCodeSpinner.setSelection(regionCodes.indexOf(selectedRegionCode))
+                }
             }
         }
 
@@ -147,7 +149,12 @@ class ListFunctionsActivity: AppCompatActivity() {
     }
 
     private fun onRegionSelected(region: String) {
-        listFunctionsViewModel.list(accessKeyId, region)
+        val accessKeyId = preferences.get(SHARED_PREFERENCE_ACCESS_KEY_ID)
+        if (accessKeyId == null) {
+            startActivity(Intent(this, ListKeysActivity::class.java))
+        } else {
+            listFunctionsViewModel.list(accessKeyId, region)
+        }
     }
 
     inner class FunctionListObserver : Observer<Either<Exception, MutableList<Function>>> {
@@ -177,7 +184,8 @@ class ListFunctionsActivity: AppCompatActivity() {
             if (results.isEmpty()) {
                 recyclerView.isVisible = false
                 noKeysMessage.isVisible = true
-                noKeysMessage.text = "No functions found in region."
+                val region = preferences.get(SHARED_PREFERENCE_REGION)
+                noKeysMessage.text = "No functions found in $region."
             } else {
                 recyclerView.isVisible = true
                 noKeysMessage.isVisible = false

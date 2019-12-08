@@ -21,6 +21,7 @@ import com.alexsci.android.lambdarunner.aws.lambda.LambdaClient
 import com.alexsci.android.lambdarunner.aws.lambda.LambdaClientBuilder
 import com.alexsci.android.lambdarunner.ui.common.ToolbarHelper
 import com.alexsci.android.lambdarunner.ui.list_functions.ListFunctionsActivity
+import com.alexsci.android.lambdarunner.ui.list_keys.ListKeysActivity
 import com.alexsci.android.lambdarunner.ui.view_results.ViewResultsActivity
 import com.alexsci.android.lambdarunner.util.preferences.PreferencesUtil
 import com.amazonaws.AmazonClientException
@@ -47,20 +48,26 @@ class RunLambdaActivity: AppCompatActivity() {
         val region = preferencesUtil.get(SHARED_PREFERENCE_REGION)
         val functionName = preferencesUtil.get(SHARED_PREFERENCE_FUNCTION_NAME)
 
-        findViewById<Toolbar>(R.id.toolbar)?.title = functionName
+        if (accessKeyId == null) {
+            startActivity(Intent(this, ListKeysActivity::class.java))
+        } else if (region == null || functionName == null) {
+            startActivity(Intent(this, ListFunctionsActivity::class.java))
+        } else {
+            findViewById<Toolbar>(R.id.toolbar)?.title = functionName
 
-        findViewById<Button>(R.id.invoke)?.setOnClickListener {
-            webView.evaluateJavascript("editor.get();") { jsonText ->
-                preferencesUtil.set(SHARED_PREFERENCE_LAST_USED_JSON, jsonText)
-                val request = InvokeFunctionRequest(functionName, jsonText)
-                val client = LambdaClientBuilder(accessKeyId, region).getClient(this@RunLambdaActivity)
-                InvokeTask(client, request).execute()
+            findViewById<Button>(R.id.invoke)?.setOnClickListener {
+                webView.evaluateJavascript("editor.get();") { jsonText ->
+                    preferencesUtil.set(SHARED_PREFERENCE_LAST_USED_JSON, jsonText)
+                    val request = InvokeFunctionRequest(functionName, jsonText)
+                    val client = LambdaClientBuilder(accessKeyId, region).getClient(this@RunLambdaActivity)
+                    InvokeTask(client, request).execute()
+                }
             }
-        }
 
-        webView = findViewById(R.id.webview)
-        webView.settings.javaScriptEnabled = true
-        webView.addJavascriptInterface(WebAppInterface(), "Android")
+            webView = findViewById(R.id.webview)
+            webView.settings.javaScriptEnabled = true
+            webView.addJavascriptInterface(WebAppInterface(), "Android")
+        }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
