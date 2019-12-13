@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="10dp"
+    >
+
+    <TextView
+        android:id="@+id/key_label"
+        android:layout_width="50dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignBaseline="@+id/key_value"
+        android:layout_marginRight="10dp"
+        android:text="Key:"
+        android:textAlignment="textEnd"
+        />
+
+    <EditText
+        android:id="@+id/key_value"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_toRightOf="@+id/key_label"
+        android:text="Foo"
+        android:inputType="text"
+        android:maxLines="1"
+        />
+
+    <TextView
+        android:id="@+id/json_type_label"
+        android:layout_width="50dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignBottom="@+id/json_type"
+        android:layout_marginRight="10dp"
+        android:text="Type"
+        android:textAlignment="textEnd"
+        />
+
+    <Spinner
+        android:id="@+id/json_type"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/key_value"
+        android:layout_alignParentRight="true"
+        android:layout_toRightOf="@+id/json_type_label"
+        />
+
+    <TextView
+        android:id="@+id/json_label"
+        android:layout_width="50dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignBaseline="@+id/value_container"
+        android:layout_marginRight="10dp"
+        android:text="Value:"
+        android:textAlignment="textEnd"
+        />
+
+    <RelativeLayout
+        android:id="@+id/value_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/json_type"
+        android:layout_toRightOf="@+id/json_label"
+        >
+
+        <TextView
+            android:id="@+id/object_textview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@+id/edit"
+            android:layout_alignTop="@+id/edit"
+            android:layout_marginTop="10dp"
+            android:text="Foo"
+            android:inputType="text"
+            android:maxLines="1"
+            />
+
+        <TextView
+            android:id="@+id/array_textview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@+id/edit"
+            android:layout_alignTop="@+id/edit"
+            android:layout_marginTop="10dp"
+            android:text="Foo"
+            android:inputType="text"
+            android:maxLines="1"
+            />
+
+        <ImageButton
+            android:id="@+id/edit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:src="@drawable/pencil"
+            android:tint="#fff"
+            />
+
+        <ToggleButton
+            android:id="@+id/boolean_toggle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:textOn="true"
+            android:textOff="false"
+            android:checked="true"
+            />
+
+        <EditText
+            android:id="@+id/string_edit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="foo"
+            android:inputType="text"
+            android:maxLines="1"
+            />
+
+        <EditText
+            android:id="@+id/number_edit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="foo"
+            android:inputType="numberDecimal|numberSigned"
+            />
+
+    </RelativeLayout>
+
+</RelativeLayout>

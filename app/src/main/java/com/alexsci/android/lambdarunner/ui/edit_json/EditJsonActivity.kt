@@ -1,51 +1,51 @@
 package com.alexsci.android.lambdarunner.ui.edit_json
 
-import android.app.Activity
 import android.os.Bundle
-import android.webkit.JavascriptInterface
-import android.webkit.WebView
-import android.webkit.WebViewClient
+import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.alexsci.android.lambdarunner.R
+import com.google.gson.JsonElement
+import com.google.gson.JsonParser
+import java.util.*
 
-class EditJsonActivity: AppCompatActivity() {
+abstract class EditJsonActivity: AppCompatActivity() {
     companion object {
         const val SAVED_STATE_JSON = "json"
+        const val SAVED_STATE_EDIT_PATH = "edit_path"
+
+        const val JSON_EXTRA = "json"
+        const val EDIT_PATH_EXTRA = "edit_path"
+
+        const val TODO_REMOVE_INIT_JSON = "{\"a\": \"b\", \"c\": {\"f\": [42.0, null], \"g\": {}, \"h\": true}, \"d\": [1,2,3,4], \"e\": 42.9, \"i\": true, \"j\": null}"
     }
 
-    private lateinit var webView: WebView
+    // Which element should we show in the editor
+    protected lateinit var jsonRoot: JsonElement
+    protected lateinit var jsonViewRoot: JsonElement
+    protected lateinit var jsonViewPath: String
 
-    private var lastKnownJson: String? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setContentView(R.layout.json_editor)
-
-        webView = findViewById(R.id.webview)
-        webView.settings.javaScriptEnabled = true
-        webView.addJavascriptInterface(WebAppInterface(), "Android")
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-
-        outState.putString(SAVED_STATE_JSON, lastKnownJson)
-    }
-
-    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-        super.onRestoreInstanceState(savedInstanceState)
-
-        lastKnownJson = savedInstanceState.getString(SAVED_STATE_JSON, "{}")
-    }
-
-    override fun onPostCreate(savedInstanceState: Bundle?) {
-        super.onPostCreate(savedInstanceState)
-
-        if (lastKnownJson == null) {
-            lastKnownJson = readJsonFromIntent()
+        val jsonText: String
+        if (savedInstanceState != null) {
+            jsonText = savedInstanceState.getString(SAVED_STATE_JSON)!!
+            jsonViewPath = savedInstanceState.getString(SAVED_STATE_EDIT_PATH)!!
+        } else {
+            if (intent.hasExtra(JSON_EXTRA)) {
+                jsonText = intent.getStringExtra(JSON_EXTRA)!!
+                // default to the root element
+                jsonViewPath = intent.getStringExtra(EDIT_PATH_EXTRA) ?: "."
+            } else {
+                jsonText = TODO_REMOVE_INIT_JSON
+                jsonViewPath = "."
+            }
         }
-        webView.webViewClient = MyWebViewClient()
-        webView.loadUrl("file:///android_asset/html/edit_json.html")
+
+        jsonRoot = JsonParser().parse(jsonText)
+        jsonViewRoot = JqLookup(jsonRoot).lookup(jsonViewPath)
     }
 
     private fun readJsonFromIntent(): String {
@@ -70,26 +70,59 @@ class EditJsonActivity: AppCompatActivity() {
         }
     }
 
-    inner class WebAppInterface {
-        @JavascriptInterface
-        fun onResult(json: String) {
-            writeJsonToIntentData(json)
-            setResult(Activity.RESULT_OK)
-            finish()
-        }
-
-        @JavascriptInterface
-        fun onChangeText(json: String) {
-            lastKnownJson = json
-        }
+    protected fun breadCrumbs(): MutableList<BreadCrumbPart> {
+        return JqBreadCrumbs().getResults(jsonViewPath)
     }
+}
 
-    inner class MyWebViewClient: WebViewClient() {
-        override fun onPageFinished(view: WebView, url: String) {
-            val js = "editor.set($lastKnownJson);"
-            view.evaluateJavascript(js) {}
+
+class EditJsonObjectActivity: EditJsonActivity() {
+    private lateinit var pathBreadCrumbs: RecyclerView
+    private lateinit var contents: RecyclerView
+    private lateinit var contentsArrayAdapter: JsonPropertyArrayAdapter
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        assert(jsonViewRoot.isJsonObject)
+
+        setContentView(R.layout.edit_json_object_activity)
+        setSupportActionBar(findViewById(R.id.toolbar))
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
+        findViewById<Button>(R.id.add_button).also {
+            it.setOnClickListener {
+                JsonEditDialog(this).add(
+                    contentsArrayAdapter
+                )
+            }
         }
-    }
 
+        pathBreadCrumbs = findViewById(R.id.breadcrumbs)
+        pathBreadCrumbs.layoutManager = LinearLayoutManager(
+            this,
+            LinearLayoutManager.HORIZONTAL,
+            false
+        )
+        pathBreadCrumbs.adapter = BreadCrumbArrayAdapter(breadCrumbs())
+
+        contents = findViewById(R.id.contents)
+        contents.layoutManager = LinearLayoutManager(
+            this,
+            LinearLayoutManager.VERTICAL,
+            false
+        )
+
+        contentsArrayAdapter = JsonPropertyArrayAdapter(
+            jsonViewPath,
+            jsonRoot,
+            TreeMap<String, JsonElement>().also {
+                for (p in jsonViewRoot.asJsonObject.entrySet()) {
+                    it[p.key] = p.value
+                }
+            }
+        )
+        contents.adapter = contentsArrayAdapter
+    }
 }
 

@@ -13,7 +13,6 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import arrow.core.Either
-import arrow.core.ListK
 import com.alexsci.android.lambdarunner.*
 import com.alexsci.android.lambdarunner.aws.RegionInfo
 import com.alexsci.android.lambdarunner.data.list_functions.model.Function
@@ -86,7 +85,9 @@ class ListFunctionsActivity: AppCompatActivity() {
             this,
             android.R.layout.simple_spinner_item,
             regionGroupNames
-        )
+        ).also {
+            it.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        }
 
         regionGroupSpinner.setSelection(regionGroupNames.indexOf(selectedRegionGroup))
         regionGroupSpinner.onItemSelectedListener = object: AdapterView.OnItemSelectedListener {
@@ -105,7 +106,9 @@ class ListFunctionsActivity: AppCompatActivity() {
                     this@ListFunctionsActivity,
                     android.R.layout.simple_spinner_item,
                     regionCodes
-                )
+                ).also {
+                    it.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                }
 
                 // If the region we previously had selected is in this group, keep it selected
                 val selectedRegionCode =

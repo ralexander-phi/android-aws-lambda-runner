@@ -7,4 +7,13 @@
     <string name="action_sign_in_short">Sign in</string>
     <string name="empty_key_list">No credentials found.\nTry adding one below.</string>
     <string name="login_failed">Saving credential failed</string>
+
+    <string-array name="JSON_Types">
+        <item>Object</item>
+        <item>Array</item>
+        <item>String</item>
+        <item>Number</item>
+        <item>Boolean</item>
+        <item>null</item>
+    </string-array>
 </resources>
