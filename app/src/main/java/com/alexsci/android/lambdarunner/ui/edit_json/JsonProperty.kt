@@ -92,6 +92,7 @@ class JsonPropertyArrayAdapter(
 
         intent.putExtra(EditJsonActivity.JSON_EXTRA, getUpdatedJsonRoot().toString())
         intent.putExtra(EditJsonActivity.EDIT_PATH_EXTRA, "${path}.${key}")
+        intent.flags = Intent.FLAG_ACTIVITY_NO_HISTORY
         context.startActivity(intent)
     }
 

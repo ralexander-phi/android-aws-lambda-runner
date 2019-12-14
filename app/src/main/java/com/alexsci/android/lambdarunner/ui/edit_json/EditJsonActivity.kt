@@ -1,6 +1,9 @@
 package com.alexsci.android.lambdarunner.ui.edit_json
 
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
+import android.view.MenuItem
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -18,6 +21,8 @@ abstract class EditJsonActivity: AppCompatActivity() {
         const val JSON_EXTRA = "json"
         const val EDIT_PATH_EXTRA = "edit_path"
 
+        const val REQUEST_CODE_EDIT = 100
+
         const val TODO_REMOVE_INIT_JSON = "{\"a\": \"b\", \"c\": {\"f\": [42.0, null], \"g\": {}, \"h\": true}, \"d\": [1,2,3,4], \"e\": 42.9, \"i\": true, \"j\": null}"
     }
 
@@ -25,6 +30,8 @@ abstract class EditJsonActivity: AppCompatActivity() {
     protected lateinit var jsonRoot: JsonElement
     protected lateinit var jsonViewRoot: JsonElement
     protected lateinit var jsonViewPath: String
+
+    protected lateinit var breadCrumbs: MutableList<BreadCrumbPart>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,7 +53,51 @@ abstract class EditJsonActivity: AppCompatActivity() {
 
         jsonRoot = JsonParser().parse(jsonText)
         jsonViewRoot = JqLookup(jsonRoot).lookup(jsonViewPath)
+        breadCrumbs = JqBreadCrumbs().getResults(jsonViewPath)
     }
+
+    override fun onBackPressed() {
+        navigateUp()
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            android.R.id.home -> {
+                navigateUp()
+                return true
+            }
+        }
+
+        return super.onOptionsItemSelected(item)
+    }
+
+    private fun navigateUp() {
+        if (breadCrumbs.size == 1) {
+            // We are at the top most JSON element, so we have finished editing
+            onDoneEditing()
+        } else {
+            // There is a parent container, get it's path and load it
+            val intent = Intent(this, EditJsonObjectActivity::class.java)
+            intent.putExtra(JSON_EXTRA, getUpdatedJsonRoot().toString())
+            intent.flags = Intent.FLAG_ACTIVITY_NO_HISTORY
+
+            if (breadCrumbs.size > 2) {
+                // If the parent isn't the root, figure out it's path
+                intent.putExtra(EDIT_PATH_EXTRA, breadCrumbs[breadCrumbs.size - 2].path)
+            }
+
+            startActivity(intent)
+        }
+    }
+
+    private fun onDoneEditing() {
+        val intent = Intent()
+        intent.putExtra(JSON_EXTRA, getUpdatedJsonRoot().toString())
+        setResult(Activity.RESULT_OK, intent)
+        finish()
+    }
+
+    abstract fun getUpdatedJsonRoot(): JsonElement
 
     private fun readJsonFromIntent(): String {
         if (intent.data != null) {
@@ -68,10 +119,6 @@ abstract class EditJsonActivity: AppCompatActivity() {
                 it?.write(json)
             }
         }
-    }
-
-    protected fun breadCrumbs(): MutableList<BreadCrumbPart> {
-        return JqBreadCrumbs().getResults(jsonViewPath)
     }
 }
 
@@ -104,7 +151,7 @@ class EditJsonObjectActivity: EditJsonActivity() {
             LinearLayoutManager.HORIZONTAL,
             false
         )
-        pathBreadCrumbs.adapter = BreadCrumbArrayAdapter(breadCrumbs())
+        pathBreadCrumbs.adapter = BreadCrumbArrayAdapter(breadCrumbs)
 
         contents = findViewById(R.id.contents)
         contents.layoutManager = LinearLayoutManager(
@@ -123,6 +170,10 @@ class EditJsonObjectActivity: EditJsonActivity() {
             }
         )
         contents.adapter = contentsArrayAdapter
+    }
+
+    override fun getUpdatedJsonRoot(): JsonElement {
+        return contentsArrayAdapter.getUpdatedJsonRoot()
     }
 }
 
