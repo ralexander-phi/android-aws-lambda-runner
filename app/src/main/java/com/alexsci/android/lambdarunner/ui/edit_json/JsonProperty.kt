@@ -3,8 +3,8 @@ package com.alexsci.android.lambdarunner.ui.edit_json
 import android.content.Context
 import android.content.Intent
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageButton
 import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
@@ -18,7 +18,6 @@ class JsonPropertyViewHolder(
 ): RecyclerView.ViewHolder(view) {
     val keyText: TextView = view.findViewById(R.id.key)
     val jsonValue: TextView = view.findViewById(R.id.json_value)
-    val actionButton: ImageButton = view.findViewById(R.id.edit)
 }
 
 class JsonPropertyArrayAdapter(
@@ -49,9 +48,13 @@ class JsonPropertyArrayAdapter(
         holder.keyText.text = originalKey
         holder.jsonValue.text = jsonText
 
-        holder.actionButton.setOnClickListener {
-            JsonEditDialog(context).edit(originalKey, element, this)
+        val onClickListener = View.OnClickListener {
+            JsonEditDialog(context).edit(originalKey, element, this@JsonPropertyArrayAdapter)
         }
+
+        // Tapping either of these will edit
+        holder.keyText.setOnClickListener(onClickListener)
+        holder.jsonValue.setOnClickListener(onClickListener)
     }
 
     override fun onRemoveItem(key: String) {

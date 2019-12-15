@@ -1,13 +1,18 @@
 package com.alexsci.android.lambdarunner.ui.run_lambda
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.os.AsyncTask
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.widget.Button
 import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
@@ -26,7 +31,9 @@ import com.alexsci.android.lambdarunner.ui.view_results.ViewResultsActivity
 import com.alexsci.android.lambdarunner.util.preferences.PreferencesUtil
 import com.amazonaws.AmazonClientException
 import com.google.gson.GsonBuilder
+import com.google.gson.JsonElement
 import com.google.gson.JsonParser
+import com.google.gson.JsonSyntaxException
 
 class RunLambdaActivity: AppCompatActivity() {
     companion object {
@@ -35,6 +42,8 @@ class RunLambdaActivity: AppCompatActivity() {
 
     private lateinit var preferencesUtil: PreferencesUtil
     private lateinit var jsonEditText: EditText
+    private lateinit var editButton: Button
+    private lateinit var errorMessage: TextView
 
     private var lastKnownJson: String? = null
 
@@ -50,7 +59,27 @@ class RunLambdaActivity: AppCompatActivity() {
         val region = preferencesUtil.get(SHARED_PREFERENCE_REGION)
         val functionName = preferencesUtil.get(SHARED_PREFERENCE_FUNCTION_NAME)
 
-        jsonEditText = findViewById(R.id.json_edittext)
+        errorMessage = findViewById<TextView>(R.id.error_message).also {
+            // Start hidden
+            it.visibility = View.GONE
+        }
+
+        jsonEditText = findViewById<EditText>(R.id.json_edittext).also {
+            it.addTextChangedListener(object: TextWatcher {
+                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+
+                override fun afterTextChanged(s: Editable?) {
+                    if (s != null) {
+                        try {
+                            onJsonValidationResult(Either.right(JsonParser().parse(s.toString())))
+                        } catch (e: JsonSyntaxException) {
+                            onJsonValidationResult(Either.left(e))
+                        }
+                    }
+                }
+            })
+        }
 
         if (accessKeyId == null) {
             startActivity(Intent(this, ListKeysActivity::class.java))
@@ -58,10 +87,12 @@ class RunLambdaActivity: AppCompatActivity() {
             startActivity(Intent(this, ListFunctionsActivity::class.java))
         } else {
             findViewById<Toolbar>(R.id.toolbar)?.title = functionName
-            findViewById<Button>(R.id.edit_json).setOnClickListener {
-                val intent = Intent(this, EditJsonObjectActivity::class.java)
-                intent.putExtra(EditJsonActivity.JSON_EXTRA, jsonEditText.text.toString())
-                startActivityForResult(intent, EditJsonActivity.REQUEST_CODE_EDIT)
+            editButton = findViewById<Button>(R.id.edit_json).also {
+                it.setOnClickListener {
+                    val intent = Intent(this, EditJsonObjectActivity::class.java)
+                    intent.putExtra(EditJsonActivity.JSON_EXTRA, jsonEditText.text.toString())
+                    startActivityForResult(intent, EditJsonActivity.REQUEST_CODE_EDIT)
+                }
             }
 
             findViewById<Button>(R.id.invoke)?.setOnClickListener {
@@ -70,6 +101,28 @@ class RunLambdaActivity: AppCompatActivity() {
                 val request = InvokeFunctionRequest(functionName, jsonText)
                 val client = LambdaClientBuilder(accessKeyId, region).getClient(this@RunLambdaActivity)
                 InvokeTask(client, request).execute()
+            }
+        }
+    }
+
+    private fun onJsonValidationResult(e: Either<JsonSyntaxException, JsonElement>) {
+        when (e) {
+            is Either.Left -> {
+                // JSON is not valid
+                editButton.isEnabled = false
+                errorMessage.text = e.a.toString()
+                errorMessage.visibility = View.VISIBLE
+            }
+
+            is Either.Right -> {
+                if (e.b.isJsonObject || e.b.isJsonArray) {
+                    editButton.isEnabled = true
+                    errorMessage.visibility = View.GONE
+                } else {
+                    editButton.isEnabled = false
+                    errorMessage.text = "Edit disabled, only able to edit arrays and objects"
+                    errorMessage.visibility = View.VISIBLE
+                }
             }
         }
     }
@@ -108,16 +161,16 @@ class RunLambdaActivity: AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         val toolbarResult = ToolbarHelper().onOptionsItemSelected(this, item)
-        return if (toolbarResult != null) {
-            toolbarResult
+        if (toolbarResult != null) {
+            return toolbarResult
         } else {
             when (item.itemId) {
                 android.R.id.home -> {
                     startActivity(Intent(this, ListFunctionsActivity::class.java))
-                    true
+                    return true
                 }
 
-                else -> super.onOptionsItemSelected(item)
+                else -> return super.onOptionsItemSelected(item)
             }
         }
     }

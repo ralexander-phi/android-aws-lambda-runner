@@ -90,7 +90,7 @@ abstract class EditJsonActivity: AppCompatActivity() {
         }
     }
 
-    private fun onDoneEditing() {
+    protected fun onDoneEditing() {
         val intent = Intent()
         intent.putExtra(JSON_EXTRA, getUpdatedJsonRoot().toString())
         setResult(Activity.RESULT_OK, intent)
@@ -137,12 +137,14 @@ class EditJsonObjectActivity: EditJsonActivity() {
         setSupportActionBar(findViewById(R.id.toolbar))
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        findViewById<Button>(R.id.add_button).also {
-            it.setOnClickListener {
-                JsonEditDialog(this).add(
-                    contentsArrayAdapter
-                )
-            }
+        findViewById<Button>(R.id.add_button).setOnClickListener {
+            JsonEditDialog(this).add(
+                contentsArrayAdapter
+            )
+        }
+
+        findViewById<Button>(R.id.done).setOnClickListener {
+            onDoneEditing()
         }
 
         pathBreadCrumbs = findViewById(R.id.breadcrumbs)
