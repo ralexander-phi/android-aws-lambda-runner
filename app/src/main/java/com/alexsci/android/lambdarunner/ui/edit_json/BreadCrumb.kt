@@ -10,7 +10,8 @@ class BreadCrumbPart(val name: String, val path: String)
 
 class BreadCrumbViewHolder(val view: TextView): RecyclerView.ViewHolder(view)
 class BreadCrumbArrayAdapter(
-    val list: MutableList<BreadCrumbPart>
+    val list: MutableList<BreadCrumbPart>,
+    private val activity: EditJsonObjectActivity
 ): RecyclerView.Adapter<BreadCrumbViewHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BreadCrumbViewHolder {
         val textView = LayoutInflater
@@ -26,7 +27,7 @@ class BreadCrumbArrayAdapter(
     override fun onBindViewHolder(holder: BreadCrumbViewHolder, position: Int) {
         holder.view.text = list[position].name
         holder.view.setOnClickListener {
-
+            activity.updateView(list[position].path)
         }
     }
 

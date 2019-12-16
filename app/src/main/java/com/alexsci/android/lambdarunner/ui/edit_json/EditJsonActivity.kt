@@ -149,7 +149,7 @@ class EditJsonObjectActivity: EditJsonActivity() {
 
         assert(jsonViewRoot.isJsonObject)
 
-        pathBreadCrumbs.adapter = BreadCrumbArrayAdapter(breadCrumbs)
+        pathBreadCrumbs.adapter = BreadCrumbArrayAdapter(breadCrumbs, this)
 
         contentsArrayAdapter = JsonPropertyArrayAdapter(
             jsonViewPath,
