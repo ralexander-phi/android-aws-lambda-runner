@@ -54,6 +54,13 @@ abstract class EditJsonActivity: AppCompatActivity() {
         changeView(jsonText, jsonViewPath)
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+
+        outState.putString(SAVED_STATE_JSON, getUpdatedJsonRoot().toString())
+        outState.putString(SAVED_STATE_EDIT_PATH, jsonViewPath)
+    }
+
     override fun onBackPressed() {
         navigateUp()
     }
