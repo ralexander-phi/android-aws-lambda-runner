@@ -192,14 +192,7 @@ class JsonEditDialog(val context: Context) {
             }
         }
 
-        editButton.setOnClickListener {
-            // First have the view (we may have changed the key)
-            save()
-            // Then edit it
-            callback.onEditJson(context, getUpdateKey())
-        }
-
-        AlertDialog.Builder(context)
+        val alertDialog = AlertDialog.Builder(context)
             .setMessage("Update Property")
             .setView(view)
             .setPositiveButton("Save") { dialogInterface, _ ->
@@ -215,7 +208,17 @@ class JsonEditDialog(val context: Context) {
                 }
                 dialogInterface.dismiss()
             }
-            .create().show()
+            .create()
+
+        editButton.setOnClickListener {
+            // First save the view (we may have changed the key)
+            save()
+            // Then edit it
+            callback.onEditJson(context, getUpdateKey())
+            alertDialog.dismiss()
+        }
+
+        alertDialog.show()
     }
 
     interface Callback {

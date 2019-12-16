@@ -33,8 +33,8 @@ abstract class EditJsonActivity: AppCompatActivity() {
 
     protected lateinit var breadCrumbs: MutableList<BreadCrumbPart>
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    override fun onPostCreate(savedInstanceState: Bundle?) {
+        super.onPostCreate(savedInstanceState)
 
         val jsonText: String
         if (savedInstanceState != null) {
@@ -51,9 +51,7 @@ abstract class EditJsonActivity: AppCompatActivity() {
             }
         }
 
-        jsonRoot = JsonParser().parse(jsonText)
-        jsonViewRoot = JqLookup(jsonRoot).lookup(jsonViewPath)
-        breadCrumbs = JqBreadCrumbs().getResults(jsonViewPath)
+        changeView(jsonText, jsonViewPath)
     }
 
     override fun onBackPressed() {
@@ -77,16 +75,13 @@ abstract class EditJsonActivity: AppCompatActivity() {
             onDoneEditing()
         } else {
             // There is a parent container, get it's path and load it
-            val intent = Intent(this, EditJsonObjectActivity::class.java)
-            intent.putExtra(JSON_EXTRA, getUpdatedJsonRoot().toString())
-            intent.flags = Intent.FLAG_ACTIVITY_NO_HISTORY
-
             if (breadCrumbs.size > 2) {
                 // If the parent isn't the root, figure out it's path
-                intent.putExtra(EDIT_PATH_EXTRA, breadCrumbs[breadCrumbs.size - 2].path)
+                changeView(getUpdatedJsonRoot().toString(), breadCrumbs[breadCrumbs.size - 2].path)
+            } else {
+                // Go to the root
+                changeView(getUpdatedJsonRoot().toString(), "")
             }
-
-            startActivity(intent)
         }
     }
 
@@ -97,29 +92,14 @@ abstract class EditJsonActivity: AppCompatActivity() {
         finish()
     }
 
+    protected open fun changeView(jsonText: String, path: String) {
+        jsonViewPath = path
+        jsonRoot = JsonParser().parse(jsonText)
+        jsonViewRoot = JqLookup(jsonRoot).lookup(jsonViewPath)
+        breadCrumbs = JqBreadCrumbs().getResults(jsonViewPath)
+    }
+
     abstract fun getUpdatedJsonRoot(): JsonElement
-
-    private fun readJsonFromIntent(): String {
-        if (intent.data != null) {
-            contentResolver.openInputStream(intent.data!!)?.reader()?.buffered().use {
-                val text = it?.readText()
-                if (text != null) {
-                    return text
-                }
-            }
-        }
-
-        // Default to an empty object
-        return "{}"
-    }
-
-    private fun writeJsonToIntentData(json: String) {
-        if (intent.data != null) {
-            contentResolver.openOutputStream(intent.data!!)?.bufferedWriter().use {
-                it?.write(json)
-            }
-        }
-    }
 }
 
 
@@ -130,8 +110,6 @@ class EditJsonObjectActivity: EditJsonActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        assert(jsonViewRoot.isJsonObject)
 
         setContentView(R.layout.edit_json_object_activity)
         setSupportActionBar(findViewById(R.id.toolbar))
@@ -153,7 +131,6 @@ class EditJsonObjectActivity: EditJsonActivity() {
             LinearLayoutManager.HORIZONTAL,
             false
         )
-        pathBreadCrumbs.adapter = BreadCrumbArrayAdapter(breadCrumbs)
 
         contents = findViewById(R.id.contents)
         contents.layoutManager = LinearLayoutManager(
@@ -161,6 +138,18 @@ class EditJsonObjectActivity: EditJsonActivity() {
             LinearLayoutManager.VERTICAL,
             false
         )
+    }
+
+    fun updateView(path: String) {
+        changeView(getUpdatedJsonRoot().toString(), path)
+    }
+
+    override fun changeView(jsonText: String, path: String) {
+        super.changeView(jsonText, path)
+
+        assert(jsonViewRoot.isJsonObject)
+
+        pathBreadCrumbs.adapter = BreadCrumbArrayAdapter(breadCrumbs)
 
         contentsArrayAdapter = JsonPropertyArrayAdapter(
             jsonViewPath,
@@ -169,7 +158,8 @@ class EditJsonObjectActivity: EditJsonActivity() {
                 for (p in jsonViewRoot.asJsonObject.entrySet()) {
                     it[p.key] = p.value
                 }
-            }
+            },
+            this
         )
         contents.adapter = contentsArrayAdapter
     }

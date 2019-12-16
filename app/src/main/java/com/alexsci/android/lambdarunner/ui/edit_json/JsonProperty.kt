@@ -1,7 +1,6 @@
 package com.alexsci.android.lambdarunner.ui.edit_json
 
 import android.content.Context
-import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -23,7 +22,8 @@ class JsonPropertyViewHolder(
 class JsonPropertyArrayAdapter(
     private val path: String,
     private val baseJson: JsonElement,
-    initialMap: Map<String, JsonElement>
+    initialMap: Map<String, JsonElement>,
+    private val activity: EditJsonObjectActivity
 ): RecyclerView.Adapter<JsonPropertyViewHolder>(), JsonEditDialog.Callback {
 
     val contents = TreeMap<String, JsonElement>(initialMap)
@@ -86,17 +86,7 @@ class JsonPropertyArrayAdapter(
     }
 
     override fun onEditJson(context: Context, key: String) {
-        val intent = when {
-            contents[key]!!.isJsonObject -> Intent(context, EditJsonObjectActivity::class.java)
-            // TODO
-            //contents[key]!!.isJsonArray-> Intent(context, EditJsonArrayActivity::class.java)
-            else -> throw RuntimeException("Can only edit container types")
-        }
-
-        intent.putExtra(EditJsonActivity.JSON_EXTRA, getUpdatedJsonRoot().toString())
-        intent.putExtra(EditJsonActivity.EDIT_PATH_EXTRA, "${path}.${key}")
-        intent.flags = Intent.FLAG_ACTIVITY_NO_HISTORY
-        context.startActivity(intent)
+        activity.updateView("${path}.${key}")
     }
 
     override fun getItemId(position: Int): Long = position.toLong()
