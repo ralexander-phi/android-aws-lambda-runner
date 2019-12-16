@@ -179,7 +179,7 @@ class JsonEditDialog(val context: Context) {
                 JsonType.OBJECT.ordinal -> JsonParser().parse(objectTextView.text.toString())
                 JsonType.ARRAY.ordinal -> JsonParser().parse(arrayTextView.text.toString())
                 JsonType.STRING.ordinal -> JsonPrimitive(stringEditText.text.toString())
-                JsonType.NUMBER.ordinal -> JsonPrimitive(numberEditText.text.toString().toDouble())
+                JsonType.NUMBER.ordinal -> JsonPrimitive(numberEditText.text.toString().toBigDecimal())
                 JsonType.BOOLEAN.ordinal -> JsonPrimitive(booleanToggle.isChecked)
                 JsonType.NULL.ordinal -> JsonNull.INSTANCE
                 else -> throw RuntimeException("Unexpected")
