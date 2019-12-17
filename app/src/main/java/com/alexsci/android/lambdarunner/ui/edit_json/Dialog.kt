@@ -11,15 +11,6 @@ import com.google.gson.JsonNull
 import com.google.gson.JsonParser
 import com.google.gson.JsonPrimitive
 
-enum class JsonType(val str: String) {
-    OBJECT("Object"),
-    ARRAY("Array"),
-    STRING("String"),
-    NUMBER("Number"),
-    BOOLEAN("Boolean"),
-    NULL("null")
-}
-
 class JsonEditDialog(val context: Context) {
     fun edit(
         originalKey: String,

@@ -4,6 +4,7 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
 import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
@@ -16,6 +17,7 @@ class JsonPropertyViewHolder(
     val view: RelativeLayout
 ): RecyclerView.ViewHolder(view) {
     val keyText: TextView = view.findViewById(R.id.key)
+    val icon: ImageButton = view.findViewById(R.id.icon)
     val jsonValue: TextView = view.findViewById(R.id.json_value)
 }
 
@@ -55,6 +57,7 @@ class JsonPropertyArrayAdapter(
         // Tapping either of these will edit
         holder.keyText.setOnClickListener(onClickListener)
         holder.jsonValue.setOnClickListener(onClickListener)
+        holder.icon.setImageResource(JsonType.of(element).imageButtonIcon)
     }
 
     override fun onRemoveItem(key: String) {
