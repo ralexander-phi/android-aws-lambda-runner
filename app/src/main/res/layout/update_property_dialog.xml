@@ -1,30 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_margin="10dp"
+    android:orientation="vertical"
+    android:padding="10dp"
     >
 
     <TextView
         android:id="@+id/key_label"
-        android:layout_width="50dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignBaseline="@+id/key_value"
-        android:layout_marginRight="10dp"
-        android:text="Key:"
-        android:textAlignment="textEnd"
+        android:text="Key"
         />
 
     <EditText
         android:id="@+id/key_value"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentRight="true"
-        android:layout_toRightOf="@+id/key_label"
         android:text="Foo"
         android:inputType="text"
         android:maxLines="1"
@@ -32,41 +25,30 @@
 
     <TextView
         android:id="@+id/json_type_label"
-        android:layout_width="50dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignBottom="@+id/json_type"
-        android:layout_marginRight="10dp"
+        android:layout_marginTop="25dp"
         android:text="Type"
-        android:textAlignment="textEnd"
         />
 
     <Spinner
         android:id="@+id/json_type"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/key_value"
-        android:layout_alignParentRight="true"
-        android:layout_toRightOf="@+id/json_type_label"
         />
 
     <TextView
         android:id="@+id/json_label"
-        android:layout_width="50dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignBaseline="@+id/value_container"
-        android:layout_marginRight="10dp"
-        android:text="Value:"
-        android:textAlignment="textEnd"
+        android:layout_marginTop="25dp"
+        android:text="Value"
         />
 
     <RelativeLayout
         android:id="@+id/value_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/json_type"
-        android:layout_toRightOf="@+id/json_label"
         >
 
         <TextView
@@ -130,5 +112,4 @@
             />
 
     </RelativeLayout>
-
-</RelativeLayout>
+</LinearLayout>
