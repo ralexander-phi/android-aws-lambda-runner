@@ -75,7 +75,7 @@ class JsonArrayAdapter(
     }
 
     override fun onRemoveItem(index: Int) {
-        if (index <= contents.size) {
+        if (index < contents.size) {
             // Existing element, remove it
             contents.removeAt(index)
             notifyDataSetChanged()

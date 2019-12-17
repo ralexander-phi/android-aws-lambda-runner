@@ -5,6 +5,7 @@
     android:layout_margin="10dp"
     android:orientation="vertical"
     android:padding="10dp"
+    android:background="@color/colorRaisedSurface"
     >
 
     <TextView
@@ -88,7 +89,6 @@
             android:id="@+id/boolean_toggle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
             android:textOn="true"
             android:textOff="false"
             android:checked="true"
@@ -111,5 +111,39 @@
             android:inputType="numberDecimal|numberSigned"
             />
 
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="25dp"
+        android:layout_margin="10dp"
+        >
+
+        <Button
+            android:id="@+id/cancel_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:text="Cancel"
+            />
+
+        <Button
+            android:id="@+id/remove_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:text="Remove"
+            />
+
+
+        <Button
+            android:id="@+id/save_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:text="Save"
+            android:theme="@style/PrimaryButton"
+            />
     </RelativeLayout>
 </LinearLayout>

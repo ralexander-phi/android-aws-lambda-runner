@@ -24,6 +24,9 @@ open class EditDialog(val context: Context) {
     val booleanToggle: ToggleButton
     val numberEditText: EditText
     val stringEditText: EditText
+    val cancelButton: Button
+    val removeButton: Button
+    val saveButton: Button
 
     init {
         val inflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
@@ -39,6 +42,9 @@ open class EditDialog(val context: Context) {
         booleanToggle = view.findViewById(R.id.boolean_toggle)
         numberEditText = view.findViewById(R.id.number_edit)
         stringEditText = view.findViewById(R.id.string_edit)
+        cancelButton = view.findViewById(R.id.cancel_button)
+        removeButton = view.findViewById(R.id.remove_button)
+        saveButton = view.findViewById(R.id.save_button)
     }
 
     protected fun getUpdatedJsonValue(): JsonElement {
@@ -146,7 +152,7 @@ open class EditDialog(val context: Context) {
 
                     JsonType.NUMBER.ordinal -> {
                         if (originalType.ordinal != position) {
-                            numberEditText.setText("42")
+                            numberEditText.setText("42.00")
                         }
                         Helpers.showViews(jsonValueLabel, numberEditText)
                         Helpers.hideViews(
@@ -231,28 +237,37 @@ class EditObjectDialog(context: Context): EditDialog(context) {
         val alertDialog = AlertDialog.Builder(context)
             .setMessage("Update Property")
             .setView(view)
-            .setPositiveButton("Save") { dialogInterface, _ ->
-                save()
-                dialogInterface.dismiss()
-            }
-            .setNeutralButton("Cancel") { dialogInterface, _ ->
-                dialogInterface.cancel()
-            }
-            .setNegativeButton("Remove") { dialogInterface, _ ->
-                if (originalKey != null) {
-                    callback.onRemoveItem(originalKey)
-                }
-                dialogInterface.dismiss()
-            }
             .create()
 
-        editButton.setOnClickListener {
+        cancelButton.setOnClickListener {
+            alertDialog.cancel()
+        }
+
+        removeButton.setOnClickListener {
+            if (originalKey != null) {
+                callback.onRemoveItem(originalKey)
+            }
+            alertDialog.dismiss()
+        }
+
+        saveButton.setOnClickListener {
+            save()
+            alertDialog.dismiss()
+        }
+
+
+        val editClickListener = View.OnClickListener {
             // First save the view (we may have changed the key)
             save()
             // Then edit it
             callback.onEditJson(context, getUpdatedKey())
             alertDialog.dismiss()
         }
+
+        // Tapping any of these will edit the value
+        editButton.setOnClickListener(editClickListener)
+        arrayTextView.setOnClickListener(editClickListener)
+        objectTextView.setOnClickListener(editClickListener)
 
         alertDialog.show()
     }
@@ -289,28 +304,36 @@ class EditArrayDialog(context: Context): EditDialog(context) {
         }
 
         val alertDialog = AlertDialog.Builder(context)
-            .setMessage("Update Property")
+            .setMessage("Update Item")
             .setView(view)
-            .setPositiveButton("Save") { dialogInterface, _ ->
-                save()
-                dialogInterface.dismiss()
-            }
-            .setNeutralButton("Cancel") { dialogInterface, _ ->
-                dialogInterface.cancel()
-            }
-            .setNegativeButton("Remove") { dialogInterface, _ ->
-                callback.onRemoveItem(index)
-                dialogInterface.dismiss()
-            }
             .create()
 
-        editButton.setOnClickListener {
+        cancelButton.setOnClickListener {
+            alertDialog.cancel()
+        }
+
+        removeButton.setOnClickListener {
+            callback.onRemoveItem(index)
+            alertDialog.dismiss()
+        }
+
+        saveButton.setOnClickListener {
+            save()
+            alertDialog.dismiss()
+        }
+
+        val editClickListener = View.OnClickListener {
             // First save the view (we may have changed the key)
             save()
             // Then edit it
             callback.onEditJson(context, index)
             alertDialog.dismiss()
         }
+
+        // Tapping any of these will edit the value
+        editButton.setOnClickListener(editClickListener)
+        arrayTextView.setOnClickListener(editClickListener)
+        objectTextView.setOnClickListener(editClickListener)
 
         alertDialog.show()
     }
