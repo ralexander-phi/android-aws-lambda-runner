@@ -16,7 +16,7 @@ import com.google.gson.JsonParser
 import java.lang.RuntimeException
 import java.util.*
 
-abstract class EditJsonActivity: AppCompatActivity() {
+class EditJsonActivity: AppCompatActivity() {
     companion object {
         const val SAVED_STATE_JSON = "json"
         const val SAVED_STATE_EDIT_PATH = "edit_path"
@@ -34,6 +34,8 @@ abstract class EditJsonActivity: AppCompatActivity() {
 
     private lateinit var breadCrumbs: MutableList<BreadCrumbPart>
     private lateinit var pathBreadCrumbs: RecyclerView
+
+    private lateinit var addButton: Button
 
     private lateinit var contents: RecyclerView
     private lateinit var objectContentsAdapter: JsonPropertyArrayAdapter
@@ -63,6 +65,8 @@ abstract class EditJsonActivity: AppCompatActivity() {
             LinearLayoutManager.VERTICAL,
             false
         )
+
+        addButton = findViewById(R.id.add_button)
 
         val jsonText: String
         if (savedInstanceState != null) {
@@ -147,6 +151,8 @@ abstract class EditJsonActivity: AppCompatActivity() {
         pathBreadCrumbs.adapter = BreadCrumbArrayAdapter(breadCrumbs, this)
 
         if (isObjectView()) {
+
+
             objectContentsAdapter = JsonPropertyArrayAdapter(
                 jsonViewPath,
                 jsonRoot,
@@ -159,10 +165,13 @@ abstract class EditJsonActivity: AppCompatActivity() {
             )
             contents.adapter = objectContentsAdapter
 
-            findViewById<Button>(R.id.add_button).setOnClickListener {
-                EditObjectDialog(this).add(
-                    objectContentsAdapter
-                )
+            addButton.also {
+                it.text = "Add Property"
+                it.setOnClickListener {
+                    EditObjectDialog(this).add(
+                        objectContentsAdapter
+                    )
+                }
             }
         } else {
             arrayContentsAdapter = JsonArrayAdapter(
@@ -173,12 +182,15 @@ abstract class EditJsonActivity: AppCompatActivity() {
             )
             contents.adapter = arrayContentsAdapter
 
-            findViewById<Button>(R.id.add_button).setOnClickListener {
-                EditArrayDialog(this).edit(
-                    arrayContentsAdapter.itemCount,
-                    null,
-                    arrayContentsAdapter
-                )
+            addButton.also {
+                it.text = "Add Item"
+                it.setOnClickListener {
+                    EditArrayDialog(this).edit(
+                        arrayContentsAdapter.itemCount,
+                        null,
+                        arrayContentsAdapter
+                    )
+                }
             }
         }
     }

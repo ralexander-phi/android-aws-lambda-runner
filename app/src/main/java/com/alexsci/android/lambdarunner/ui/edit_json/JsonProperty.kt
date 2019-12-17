@@ -63,25 +63,13 @@ class JsonPropertyArrayAdapter(
     }
 
     override fun onRemoveItem(key: String) {
-        val oldPos = contents.keys.toTypedArray().indexOf(key)
-        if (oldPos != -1) {
-            contents.remove(key)
-            notifyItemRemoved(oldPos)
-        }
+        contents.remove(key)
+        notifyDataSetChanged()
     }
 
     override fun onUpdateItem(key: String, element: JsonElement) {
-        val pos = contents.keys.toTypedArray().indexOf(key)
-        if (pos != -1) {
-            // Update in place
-            contents[key] = element
-            notifyItemChanged(pos)
-        } else {
-            // Adding item
-            contents[key] = element
-            val newPos = contents.keys.toTypedArray().indexOf(key)
-            notifyItemInserted(newPos)
-        }
+        contents[key] = element
+        notifyDataSetChanged()
     }
 
     override fun onUpdateItem(oldKey: String, newKey: String, element: JsonElement) {

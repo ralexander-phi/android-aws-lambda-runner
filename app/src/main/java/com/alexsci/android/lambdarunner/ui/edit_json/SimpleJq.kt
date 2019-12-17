@@ -171,7 +171,7 @@ class JqJsonUpdater(val root: JsonElement): SimpleJqPathParser() {
                 // We can't update the array, so let's make a copy with our value added at the correct place
                 val oldParentArray = elementStack.peek().asJsonArray
                 val newParentArray = JsonArray()
-                for (i in 0..oldParentArray.size()) {
+                for (i in 0 until oldParentArray.size()) {
                     if (i == selector.b) {
                         newParentArray.add(newValue)
                     } else {

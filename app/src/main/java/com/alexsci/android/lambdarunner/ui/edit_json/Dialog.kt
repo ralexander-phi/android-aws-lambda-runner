@@ -221,7 +221,6 @@ class EditObjectDialog(context: Context): EditDialog(context) {
         fun save() {
             val newKey = getUpdatedKey()
 
-
             if (originalKey != null && originalKey != newKey) {
                 callback.onUpdateItem(originalKey, newKey, getUpdatedJsonValue())
             } else {

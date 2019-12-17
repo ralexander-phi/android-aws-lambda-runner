@@ -83,7 +83,7 @@ class JsonArrayAdapter(
     }
 
     override fun onUpdateItem(index: Int, element: JsonElement) {
-        if (index <= contents.size) {
+        if (index < contents.size) {
             // Existing element, update it
             contents[index] = element
         } else {

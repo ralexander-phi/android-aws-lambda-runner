@@ -60,7 +60,7 @@
         </activity>
 
         <activity
-            android:name=".ui.edit_json.EditJsonObjectActivity"
+            android:name=".ui.edit_json.EditJsonActivity"
             android:label="Edit JSON"
             android:parentActivityName=".ui.list_functions.ListFunctionsActivity">
         </activity>

@@ -179,7 +179,7 @@ class RunLambdaActivity: AppCompatActivity() {
     }
 
     private fun setJsonText(uglyJson: String) {
-        val gson = GsonBuilder().setPrettyPrinting().create()
+        val gson = GsonBuilder().setPrettyPrinting().serializeNulls().create()
         val root = JsonParser().parse(uglyJson)
         val prettyJson = gson.toJson(root)
         jsonEditText.setText(prettyJson)
