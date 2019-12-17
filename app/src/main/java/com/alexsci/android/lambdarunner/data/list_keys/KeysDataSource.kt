@@ -10,7 +10,7 @@ class KeysDataSource(private val keyManagement: KeyManagement) {
 
         for (keyName in keyNames) {
             val info = keyManagement.describeKey(keyName)
-            keyModels.add(Key(info.name, info.description))
+            keyModels.add(Key(info.name, info.awsARN))
         }
 
         return keyModels

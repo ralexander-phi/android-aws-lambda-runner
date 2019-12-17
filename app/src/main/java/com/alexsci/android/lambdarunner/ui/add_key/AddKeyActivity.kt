@@ -318,7 +318,7 @@ class AddKeyActivity : AppCompatActivity() {
                 }
                 is Either.Right -> {
                     val username = getUserResult.b.getUserResult.user.userName
-                    keyManagement.addKey(accessKey, username, secretKey)
+                    keyManagement.addKey(username, accessKey, secretKey)
                     Either.right(username)
                 }
             }

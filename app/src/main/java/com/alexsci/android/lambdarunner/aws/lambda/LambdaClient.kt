@@ -106,7 +106,7 @@ class LambdaClientBuilder(
     private val region: String
 ) {
     fun getClient(context: Context) : LambdaClient {
-        val secretKey = KeyManagement.getInstance(context).getKey(accessKey)
+        val secretKey = KeyManagement.getInstance(context).getKeyByArn(accessKey)
         val creds = BasicAWSCredentials(accessKey, secretKey)
         val credsProvider = StaticCredentialsProvider(creds)
         return LambdaClient(credsProvider, Region.getRegion(region))

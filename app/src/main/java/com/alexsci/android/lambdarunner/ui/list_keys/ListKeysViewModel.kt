@@ -20,7 +20,7 @@ class ListKeysViewModel(private val keysRepository: KeysRepository) : ViewModel(
         RemoveKeyTask(key).execute(null)
     }
 
-    private inner open class ListTask: AsyncTask<Void, Void, ListKeysResult>() {
+    private open inner class ListTask: AsyncTask<Void, Void, ListKeysResult>() {
         override fun doInBackground(vararg params: Void): ListKeysResult {
             val keys = keysRepository.list()
             if (keys != null) {

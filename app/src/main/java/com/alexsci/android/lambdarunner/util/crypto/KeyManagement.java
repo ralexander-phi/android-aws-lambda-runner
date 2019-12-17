@@ -128,19 +128,13 @@ public class KeyManagement {
         return keyStore.getKey(ROOT_KEY, null);
     }
 
-    private void deleteRootKey() throws KeyStoreException {
-        Log.i("RAA", "Deleting root key...");
-        keyStore.deleteEntry(ROOT_KEY);
-        Log.i("RAA", "Deleted");
-    }
-
     public Collection<String> listKeys() {
         return sharedPreferences.getAll().keySet();
     }
 
-    public boolean addKey(String name, String description, String value) throws GeneralSecurityException {
+    public boolean addKey(String name, String awsARN, String value) throws GeneralSecurityException {
         EncryptedResult result = encrypt(value);
-        BasicCredentialInformation info = new BasicCredentialInformation(name, description, result.getIv(), result.getEncrypted());
+        BasicCredentialInformation info = new BasicCredentialInformation(name, awsARN, result.getIv(), result.getEncrypted());
         return sharedPreferences.edit().putString(name, info.toJson()).commit();
     }
 
@@ -159,6 +153,15 @@ public class KeyManagement {
     public String getKey(String name) throws GeneralSecurityException {
         BasicCredentialInformation info = describeKey(name);
         return decrypt(info.getIv(), info.getEncrypted());
+    }
+
+    public String getKeyByArn(String arn) throws GeneralSecurityException {
+        for (String keyName: listKeys()) {
+            if (describeKey(keyName).getAwsARN().equals(arn)) {
+                return getKey(keyName);
+            }
+        }
+        throw new InvalidKeyException("Can't find " + arn);
     }
 
     public boolean deleteKey(String name) {

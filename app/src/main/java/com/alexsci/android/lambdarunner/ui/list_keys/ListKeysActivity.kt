@@ -5,7 +5,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import androidx.appcompat.widget.Toolbar
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProviders
 import com.alexsci.android.lambdarunner.R
@@ -98,17 +97,17 @@ class ListKeysActivity: BaseListActivity() {
             val context = holder.view.context
 
             holder.title.text = currentItem.keyName
-            holder.description.text = currentItem.description
+            holder.description.text = currentItem.awsARN
 
             holder.run.setOnClickListener {
-                val accessKeyId = currentItem.keyName
+                val accessKeyId = currentItem.awsARN
                 preferences.set(SHARED_PREFERENCE_ACCESS_KEY_ID, accessKeyId)
                 context.startActivity(Intent(context, ListFunctionsActivity::class.java))
             }
 
             holder.remove.setOnClickListener {
                 val builder = AlertDialog.Builder(this@ListKeysActivity)
-                builder.setMessage("Are you sure you want to remove ${holder.title.text}?")
+                builder.setMessage("Are you sure you want to remove ${currentItem.keyName}?")
                 builder.setPositiveButton("Remove") { dialog, _ ->
                     listKeysViewModel.remove(currentItem)
                     dialog.dismiss()
