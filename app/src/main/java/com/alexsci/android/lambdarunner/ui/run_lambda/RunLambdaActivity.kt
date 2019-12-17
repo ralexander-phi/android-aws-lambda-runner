@@ -1,7 +1,6 @@
 package com.alexsci.android.lambdarunner.ui.run_lambda
 
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.os.AsyncTask
 import android.os.Bundle
@@ -24,7 +23,6 @@ import com.alexsci.android.lambdarunner.aws.lambda.LambdaClient
 import com.alexsci.android.lambdarunner.aws.lambda.LambdaClientBuilder
 import com.alexsci.android.lambdarunner.ui.common.ToolbarHelper
 import com.alexsci.android.lambdarunner.ui.edit_json.EditJsonActivity
-import com.alexsci.android.lambdarunner.ui.edit_json.EditJsonObjectActivity
 import com.alexsci.android.lambdarunner.ui.list_functions.ListFunctionsActivity
 import com.alexsci.android.lambdarunner.ui.list_keys.ListKeysActivity
 import com.alexsci.android.lambdarunner.ui.view_results.ViewResultsActivity
@@ -89,7 +87,7 @@ class RunLambdaActivity: AppCompatActivity() {
             findViewById<Toolbar>(R.id.toolbar)?.title = functionName
             editButton = findViewById<Button>(R.id.edit_json).also {
                 it.setOnClickListener {
-                    val intent = Intent(this, EditJsonObjectActivity::class.java)
+                    val intent = Intent(this, EditJsonActivity::class.java)
                     intent.putExtra(EditJsonActivity.JSON_EXTRA, jsonEditText.text.toString())
                     startActivityForResult(intent, EditJsonActivity.REQUEST_CODE_EDIT)
                 }

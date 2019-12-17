@@ -11,53 +11,49 @@ import com.google.gson.JsonNull
 import com.google.gson.JsonParser
 import com.google.gson.JsonPrimitive
 
-class JsonEditDialog(val context: Context) {
-    fun edit(
-        originalKey: String,
-        element: JsonElement,
-        callback: Callback
-    ) {
-        create(originalKey, element, callback)
-    }
+open class EditDialog(val context: Context) {
+    val view: View
 
-    fun add(callback: Callback) {
-        create(null, null, callback)
-    }
+    val keyLabel: TextView
+    val keyValue: EditText
+    val objectTextView: TextView
+    val arrayTextView: TextView
+    val jsonValueLabel: TextView
+    val jsonTypeSpinner: Spinner
+    val editButton: ImageButton
+    val booleanToggle: ToggleButton
+    val numberEditText: EditText
+    val stringEditText: EditText
 
-    private fun create(
-        originalKey: String?,
-        element: JsonElement?,
-        callback: Callback
-    ) {
-        val jsonText = if (element != null) Helpers.prettySingleLineJsonString(element) else "text"
-
+    init {
         val inflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-        val view = inflater.inflate(R.layout.update_property_dialog, null)
+        view = inflater.inflate(R.layout.update_property_dialog, null)
 
-        val keyValue = view.findViewById<EditText>(R.id.key_value)
-        val objectTextView = view.findViewById<TextView>(R.id.object_textview)
-        val arrayTextView = view.findViewById<TextView>(R.id.array_textview)
-        val jsonValueLabel = view.findViewById<TextView>(R.id.json_label)
-        val jsonTypeSpinner = view.findViewById<Spinner>(R.id.json_type)
-        val editButton = view.findViewById<ImageButton>(R.id.edit)
-        val booleanToggle = view.findViewById<ToggleButton>(R.id.boolean_toggle)
-        val numberEditText = view.findViewById<EditText>(R.id.number_edit)
-        val stringEditText = view.findViewById<EditText>(R.id.string_edit)
+        keyLabel = view.findViewById(R.id.key_label)
+        keyValue = view.findViewById(R.id.key_value)
+        objectTextView = view.findViewById(R.id.object_textview)
+        arrayTextView = view.findViewById(R.id.array_textview)
+        jsonValueLabel = view.findViewById(R.id.json_label)
+        jsonTypeSpinner = view.findViewById(R.id.json_type)
+        editButton = view.findViewById(R.id.edit)
+        booleanToggle = view.findViewById(R.id.boolean_toggle)
+        numberEditText = view.findViewById(R.id.number_edit)
+        stringEditText = view.findViewById(R.id.string_edit)
+    }
 
-        if (originalKey == null) {
-            keyValue.setText("new")
-        } else {
-            keyValue.setText(originalKey)
+    protected fun getUpdatedJsonValue(): JsonElement {
+        return when (jsonTypeSpinner.selectedItemPosition) {
+            JsonType.OBJECT.ordinal -> JsonParser().parse(objectTextView.text.toString())
+            JsonType.ARRAY.ordinal -> JsonParser().parse(arrayTextView.text.toString())
+            JsonType.STRING.ordinal -> JsonPrimitive(stringEditText.text.toString())
+            JsonType.NUMBER.ordinal -> JsonPrimitive(numberEditText.text.toString().toBigDecimal())
+            JsonType.BOOLEAN.ordinal -> JsonPrimitive(booleanToggle.isChecked)
+            JsonType.NULL.ordinal -> JsonNull.INSTANCE
+            else -> throw RuntimeException("Unexpected")
         }
+    }
 
-        val adapter = ArrayAdapter(
-            context,
-            android.R.layout.simple_spinner_item,
-            JsonType.values().map { it.str }
-        )
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        jsonTypeSpinner.adapter = adapter
-
+    protected fun createViews(element: JsonElement?) {
         val originalType: JsonType
 
         when {
@@ -66,11 +62,11 @@ class JsonEditDialog(val context: Context) {
                 originalType = JsonType.STRING
             }
             element.isJsonObject -> {
-                objectTextView.text = jsonText
+                objectTextView.text = Helpers.prettySingleLineJsonString(element)
                 originalType = JsonType.OBJECT
             }
             element.isJsonArray -> {
-                arrayTextView.text = jsonText
+                arrayTextView.text = Helpers.prettySingleLineJsonString(element)
                 originalType = JsonType.ARRAY
             }
             element.isJsonNull -> {
@@ -98,7 +94,7 @@ class JsonEditDialog(val context: Context) {
         }
 
         jsonTypeSpinner.setSelection(originalType.ordinal)
-        jsonTypeSpinner.onItemSelectedListener = object: AdapterView.OnItemSelectedListener {
+        jsonTypeSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onNothingSelected(parent: AdapterView<*>?) {}
 
             override fun onItemSelected(
@@ -113,7 +109,12 @@ class JsonEditDialog(val context: Context) {
                             objectTextView.text = "{}"
                         }
                         Helpers.showViews(jsonValueLabel, objectTextView, editButton)
-                        Helpers.hideViews(arrayTextView, booleanToggle, numberEditText, stringEditText)
+                        Helpers.hideViews(
+                            arrayTextView,
+                            booleanToggle,
+                            numberEditText,
+                            stringEditText
+                        )
                     }
 
                     JsonType.ARRAY.ordinal -> {
@@ -121,7 +122,12 @@ class JsonEditDialog(val context: Context) {
                             arrayTextView.text = "[]"
                         }
                         Helpers.showViews(jsonValueLabel, arrayTextView, editButton)
-                        Helpers.hideViews(objectTextView, booleanToggle, numberEditText, stringEditText)
+                        Helpers.hideViews(
+                            objectTextView,
+                            booleanToggle,
+                            numberEditText,
+                            stringEditText
+                        )
                     }
 
                     JsonType.STRING.ordinal -> {
@@ -129,7 +135,13 @@ class JsonEditDialog(val context: Context) {
                             stringEditText.setText("text")
                         }
                         Helpers.showViews(jsonValueLabel, stringEditText)
-                        Helpers.hideViews(booleanToggle, numberEditText, objectTextView, arrayTextView, editButton)
+                        Helpers.hideViews(
+                            booleanToggle,
+                            numberEditText,
+                            objectTextView,
+                            arrayTextView,
+                            editButton
+                        )
                     }
 
                     JsonType.NUMBER.ordinal -> {
@@ -137,7 +149,13 @@ class JsonEditDialog(val context: Context) {
                             numberEditText.setText("42")
                         }
                         Helpers.showViews(jsonValueLabel, numberEditText)
-                        Helpers.hideViews(booleanToggle, objectTextView, arrayTextView, editButton, stringEditText)
+                        Helpers.hideViews(
+                            booleanToggle,
+                            objectTextView,
+                            arrayTextView,
+                            editButton,
+                            stringEditText
+                        )
                     }
 
                     JsonType.BOOLEAN.ordinal -> {
@@ -145,7 +163,13 @@ class JsonEditDialog(val context: Context) {
                             booleanToggle.isChecked = true
                         }
                         Helpers.showViews(jsonValueLabel, booleanToggle)
-                        Helpers.hideViews(objectTextView, arrayTextView, editButton, stringEditText, numberEditText)
+                        Helpers.hideViews(
+                            objectTextView,
+                            arrayTextView,
+                            editButton,
+                            stringEditText,
+                            numberEditText
+                        )
                     }
 
                     JsonType.NULL.ordinal -> {
@@ -159,27 +183,49 @@ class JsonEditDialog(val context: Context) {
             }
         }
 
-        fun getUpdateKey(): String {
+    }
+}
+
+class EditObjectDialog(context: Context): EditDialog(context) {
+    fun add(callback: ObjectCallback) {
+        edit(null, null, callback)
+    }
+
+    fun edit(
+        originalKey: String?,
+        element: JsonElement?,
+        callback: ObjectCallback
+    ) {
+        Helpers.showViews(keyLabel, keyValue)
+
+        if (originalKey == null) {
+            keyValue.setText("new")
+        } else {
+            keyValue.setText(originalKey)
+        }
+
+        val adapter = ArrayAdapter(
+            context,
+            android.R.layout.simple_spinner_item,
+            JsonType.values().map { it.str }
+        )
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        jsonTypeSpinner.adapter = adapter
+
+        createViews(element)
+
+        fun getUpdatedKey(): String {
             return keyValue.text.toString()
         }
 
         fun save() {
-            val newKey = getUpdateKey()
+            val newKey = getUpdatedKey()
 
-            val newJsonElement: JsonElement = when (jsonTypeSpinner.selectedItemPosition) {
-                JsonType.OBJECT.ordinal -> JsonParser().parse(objectTextView.text.toString())
-                JsonType.ARRAY.ordinal -> JsonParser().parse(arrayTextView.text.toString())
-                JsonType.STRING.ordinal -> JsonPrimitive(stringEditText.text.toString())
-                JsonType.NUMBER.ordinal -> JsonPrimitive(numberEditText.text.toString().toBigDecimal())
-                JsonType.BOOLEAN.ordinal -> JsonPrimitive(booleanToggle.isChecked)
-                JsonType.NULL.ordinal -> JsonNull.INSTANCE
-                else -> throw RuntimeException("Unexpected")
-            }
 
             if (originalKey != null && originalKey != newKey) {
-                callback.onUpdateItem(originalKey, newKey, newJsonElement)
+                callback.onUpdateItem(originalKey, newKey, getUpdatedJsonValue())
             } else {
-                callback.onUpdateItem(newKey, newJsonElement)
+                callback.onUpdateItem(newKey, getUpdatedJsonValue())
             }
         }
 
@@ -205,17 +251,74 @@ class JsonEditDialog(val context: Context) {
             // First save the view (we may have changed the key)
             save()
             // Then edit it
-            callback.onEditJson(context, getUpdateKey())
+            callback.onEditJson(context, getUpdatedKey())
             alertDialog.dismiss()
         }
 
         alertDialog.show()
     }
 
-    interface Callback {
+    interface ObjectCallback {
         fun onRemoveItem(key: String)
         fun onUpdateItem(key: String, element: JsonElement)
         fun onUpdateItem(oldKey: String, newKey: String, element: JsonElement)
         fun onEditJson(context: Context, key: String)
+    }
+}
+
+
+class EditArrayDialog(context: Context): EditDialog(context) {
+    fun edit(
+        index: Int,
+        element: JsonElement?,
+        callback: ArrayCallback
+    ) {
+        Helpers.hideViews(keyLabel, keyValue)
+
+        val adapter = ArrayAdapter(
+            context,
+            android.R.layout.simple_spinner_item,
+            JsonType.values().map { it.str }
+        )
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        jsonTypeSpinner.adapter = adapter
+
+        createViews(element)
+
+        fun save() {
+            callback.onUpdateItem(index, getUpdatedJsonValue())
+        }
+
+        val alertDialog = AlertDialog.Builder(context)
+            .setMessage("Update Property")
+            .setView(view)
+            .setPositiveButton("Save") { dialogInterface, _ ->
+                save()
+                dialogInterface.dismiss()
+            }
+            .setNeutralButton("Cancel") { dialogInterface, _ ->
+                dialogInterface.cancel()
+            }
+            .setNegativeButton("Remove") { dialogInterface, _ ->
+                callback.onRemoveItem(index)
+                dialogInterface.dismiss()
+            }
+            .create()
+
+        editButton.setOnClickListener {
+            // First save the view (we may have changed the key)
+            save()
+            // Then edit it
+            callback.onEditJson(context, index)
+            alertDialog.dismiss()
+        }
+
+        alertDialog.show()
+    }
+
+    interface ArrayCallback {
+        fun onRemoveItem(index: Int)
+        fun onUpdateItem(index: Int, element: JsonElement)
+        fun onEditJson(context: Context, index: Int)
     }
 }

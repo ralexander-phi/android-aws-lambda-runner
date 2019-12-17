@@ -25,8 +25,8 @@ class JsonPropertyArrayAdapter(
     private val path: String,
     private val baseJson: JsonElement,
     initialMap: Map<String, JsonElement>,
-    private val activity: EditJsonObjectActivity
-): RecyclerView.Adapter<JsonPropertyViewHolder>(), JsonEditDialog.Callback {
+    private val activity: EditJsonActivity
+): RecyclerView.Adapter<JsonPropertyViewHolder>(), EditObjectDialog.ObjectCallback {
 
     val contents = TreeMap<String, JsonElement>(initialMap)
 
@@ -51,12 +51,14 @@ class JsonPropertyArrayAdapter(
         holder.jsonValue.text = jsonText
 
         val onClickListener = View.OnClickListener {
-            JsonEditDialog(context).edit(originalKey, element, this@JsonPropertyArrayAdapter)
+            EditObjectDialog(context).edit(originalKey, element, this@JsonPropertyArrayAdapter)
         }
 
-        // Tapping either of these will edit
+        // Tapping any of these will edit
         holder.keyText.setOnClickListener(onClickListener)
         holder.jsonValue.setOnClickListener(onClickListener)
+        holder.icon.setOnClickListener(onClickListener)
+
         holder.icon.setImageResource(JsonType.of(element).imageButtonIcon)
     }
 

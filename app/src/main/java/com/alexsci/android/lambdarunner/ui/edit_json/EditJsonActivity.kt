@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.alexsci.android.lambdarunner.R
 import com.google.gson.JsonElement
 import com.google.gson.JsonParser
+import java.lang.RuntimeException
 import java.util.*
 
 abstract class EditJsonActivity: AppCompatActivity() {
@@ -24,17 +25,46 @@ abstract class EditJsonActivity: AppCompatActivity() {
         const val REQUEST_CODE_EDIT = 100
 
         const val TODO_REMOVE_INIT_JSON = "{\"a\": \"b\", \"c\": {\"f\": [42.0, null], \"g\": {}, \"h\": true}, \"d\": [1,2,3,4], \"e\": 42.9, \"i\": true, \"j\": null}"
+
+        const val ROOT_JQ_PATH = ""
     }
 
     // Which element should we show in the editor
-    protected lateinit var jsonRoot: JsonElement
-    protected lateinit var jsonViewRoot: JsonElement
-    protected lateinit var jsonViewPath: String
+    private lateinit var jsonRoot: JsonElement
+    private lateinit var jsonViewRoot: JsonElement
+    private lateinit var jsonViewPath: String
 
-    protected lateinit var breadCrumbs: MutableList<BreadCrumbPart>
+    private lateinit var breadCrumbs: MutableList<BreadCrumbPart>
+    private lateinit var pathBreadCrumbs: RecyclerView
 
-    override fun onPostCreate(savedInstanceState: Bundle?) {
-        super.onPostCreate(savedInstanceState)
+    private lateinit var contents: RecyclerView
+    private lateinit var objectContentsAdapter: JsonPropertyArrayAdapter
+    private lateinit var arrayContentsAdapter: JsonArrayAdapter
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        setContentView(R.layout.edit_json_object_activity)
+        setSupportActionBar(findViewById(R.id.toolbar))
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
+        findViewById<Button>(R.id.done).setOnClickListener {
+            onDoneEditing()
+        }
+
+        pathBreadCrumbs = findViewById(R.id.breadcrumbs)
+        pathBreadCrumbs.layoutManager = LinearLayoutManager(
+            this,
+            LinearLayoutManager.HORIZONTAL,
+            false
+        )
+
+        contents = findViewById(R.id.contents)
+        contents.layoutManager = LinearLayoutManager(
+            this,
+            LinearLayoutManager.VERTICAL,
+            false
+        )
 
         val jsonText: String
         if (savedInstanceState != null) {
@@ -44,10 +74,10 @@ abstract class EditJsonActivity: AppCompatActivity() {
             if (intent.hasExtra(JSON_EXTRA)) {
                 jsonText = intent.getStringExtra(JSON_EXTRA)!!
                 // default to the root element
-                jsonViewPath = intent.getStringExtra(EDIT_PATH_EXTRA) ?: "."
+                jsonViewPath = intent.getStringExtra(EDIT_PATH_EXTRA) ?: ROOT_JQ_PATH
             } else {
                 jsonText = TODO_REMOVE_INIT_JSON
-                jsonViewPath = "."
+                jsonViewPath = ""
             }
         }
 
@@ -87,7 +117,7 @@ abstract class EditJsonActivity: AppCompatActivity() {
                 changeView(getUpdatedJsonRoot().toString(), breadCrumbs[breadCrumbs.size - 2].path)
             } else {
                 // Go to the root
-                changeView(getUpdatedJsonRoot().toString(), "")
+                changeView(getUpdatedJsonRoot().toString(), ROOT_JQ_PATH)
             }
         }
     }
@@ -99,80 +129,71 @@ abstract class EditJsonActivity: AppCompatActivity() {
         finish()
     }
 
-    protected open fun changeView(jsonText: String, path: String) {
+    private fun isObjectView(): Boolean {
+        if (jsonViewRoot.isJsonObject) {
+            return true
+        } else if (jsonViewRoot.isJsonArray) {
+            return false
+        } else {
+            throw RuntimeException("Unexpected")
+        }
+    }
+
+    private fun changeView(jsonText: String, path: String) {
         jsonViewPath = path
         jsonRoot = JsonParser().parse(jsonText)
         jsonViewRoot = JqLookup(jsonRoot).lookup(jsonViewPath)
         breadCrumbs = JqBreadCrumbs().getResults(jsonViewPath)
-    }
 
-    abstract fun getUpdatedJsonRoot(): JsonElement
-}
+        pathBreadCrumbs.adapter = BreadCrumbArrayAdapter(breadCrumbs, this)
 
-
-class EditJsonObjectActivity: EditJsonActivity() {
-    private lateinit var pathBreadCrumbs: RecyclerView
-    private lateinit var contents: RecyclerView
-    private lateinit var contentsArrayAdapter: JsonPropertyArrayAdapter
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        setContentView(R.layout.edit_json_object_activity)
-        setSupportActionBar(findViewById(R.id.toolbar))
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-
-        findViewById<Button>(R.id.add_button).setOnClickListener {
-            JsonEditDialog(this).add(
-                contentsArrayAdapter
+        if (isObjectView()) {
+            objectContentsAdapter = JsonPropertyArrayAdapter(
+                jsonViewPath,
+                jsonRoot,
+                TreeMap<String, JsonElement>().also {
+                    for (p in jsonViewRoot.asJsonObject.entrySet()) {
+                        it[p.key] = p.value
+                    }
+                },
+                this
             )
+            contents.adapter = objectContentsAdapter
+
+            findViewById<Button>(R.id.add_button).setOnClickListener {
+                EditObjectDialog(this).add(
+                    objectContentsAdapter
+                )
+            }
+        } else {
+            arrayContentsAdapter = JsonArrayAdapter(
+                jsonViewPath,
+                jsonRoot,
+                jsonViewRoot.asJsonArray,
+                this
+            )
+            contents.adapter = arrayContentsAdapter
+
+            findViewById<Button>(R.id.add_button).setOnClickListener {
+                EditArrayDialog(this).edit(
+                    arrayContentsAdapter.itemCount,
+                    null,
+                    arrayContentsAdapter
+                )
+            }
         }
-
-        findViewById<Button>(R.id.done).setOnClickListener {
-            onDoneEditing()
-        }
-
-        pathBreadCrumbs = findViewById(R.id.breadcrumbs)
-        pathBreadCrumbs.layoutManager = LinearLayoutManager(
-            this,
-            LinearLayoutManager.HORIZONTAL,
-            false
-        )
-
-        contents = findViewById(R.id.contents)
-        contents.layoutManager = LinearLayoutManager(
-            this,
-            LinearLayoutManager.VERTICAL,
-            false
-        )
     }
 
     fun updateView(path: String) {
         changeView(getUpdatedJsonRoot().toString(), path)
     }
 
-    override fun changeView(jsonText: String, path: String) {
-        super.changeView(jsonText, path)
-
-        assert(jsonViewRoot.isJsonObject)
-
-        pathBreadCrumbs.adapter = BreadCrumbArrayAdapter(breadCrumbs, this)
-
-        contentsArrayAdapter = JsonPropertyArrayAdapter(
-            jsonViewPath,
-            jsonRoot,
-            TreeMap<String, JsonElement>().also {
-                for (p in jsonViewRoot.asJsonObject.entrySet()) {
-                    it[p.key] = p.value
-                }
-            },
-            this
-        )
-        contents.adapter = contentsArrayAdapter
-    }
-
-    override fun getUpdatedJsonRoot(): JsonElement {
-        return contentsArrayAdapter.getUpdatedJsonRoot()
+    fun getUpdatedJsonRoot(): JsonElement {
+        return if (isObjectView()) {
+            objectContentsAdapter.getUpdatedJsonRoot()
+        } else {
+            arrayContentsAdapter.getUpdatedJsonRoot()
+        }
     }
 }
 
