@@ -151,7 +151,7 @@ class RunLambdaActivity: AppCompatActivity() {
         super.onPostCreate(savedInstanceState)
 
         if (lastKnownJson == null) {
-            lastKnownJson = preferencesUtil.get(SHARED_PREFERENCE_LAST_USED_JSON, "{}")
+            lastKnownJson = preferencesUtil.get(SHARED_PREFERENCE_LAST_USED_JSON, EMPTY_JSON_OBJECT_TEXT)
         }
 
         setJsonText(lastKnownJson!!)

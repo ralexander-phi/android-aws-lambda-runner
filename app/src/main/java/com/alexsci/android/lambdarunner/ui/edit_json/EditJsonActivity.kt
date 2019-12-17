@@ -8,7 +8,9 @@ import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.alexsci.android.lambdarunner.EMPTY_JSON_OBJECT_TEXT
 import com.alexsci.android.lambdarunner.R
+import com.alexsci.android.lambdarunner.ROOT_JQ_PATH
 import com.google.gson.JsonElement
 import com.google.gson.JsonParser
 import java.lang.RuntimeException
@@ -23,10 +25,6 @@ abstract class EditJsonActivity: AppCompatActivity() {
         const val EDIT_PATH_EXTRA = "edit_path"
 
         const val REQUEST_CODE_EDIT = 100
-
-        const val TODO_REMOVE_INIT_JSON = "{\"a\": \"b\", \"c\": {\"f\": [42.0, null], \"g\": {}, \"h\": true}, \"d\": [1,2,3,4], \"e\": 42.9, \"i\": true, \"j\": null}"
-
-        const val ROOT_JQ_PATH = ""
     }
 
     // Which element should we show in the editor
@@ -76,8 +74,9 @@ abstract class EditJsonActivity: AppCompatActivity() {
                 // default to the root element
                 jsonViewPath = intent.getStringExtra(EDIT_PATH_EXTRA) ?: ROOT_JQ_PATH
             } else {
-                jsonText = TODO_REMOVE_INIT_JSON
-                jsonViewPath = ""
+                // Fallback to an empty object
+                jsonText = EMPTY_JSON_OBJECT_TEXT
+                jsonViewPath = ROOT_JQ_PATH
             }
         }
 

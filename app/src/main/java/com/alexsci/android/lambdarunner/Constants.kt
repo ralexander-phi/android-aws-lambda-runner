@@ -13,3 +13,6 @@ const val SHARED_PREFERENCE_FUNCTION_NAME = "FunctionName"
 // Application state
 const val SHARED_PREFERENCE_SHOW_QR_CODE_HELP = "ShowQRCodeHelp"
 const val SHARED_PREFERENCE_LAST_USED_JSON = "LastUsedJson"
+
+const val ROOT_JQ_PATH = ""
+const val EMPTY_JSON_OBJECT_TEXT = "{}"
