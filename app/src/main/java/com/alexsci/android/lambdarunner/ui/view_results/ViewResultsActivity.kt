@@ -30,7 +30,7 @@ class ViewResultsActivity: AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         val uglyJson = intent.getStringExtra(RESULT_JSON)
-        val gson = GsonBuilder().setPrettyPrinting().create()
+        val gson = GsonBuilder().setPrettyPrinting().serializeNulls().create()
         val root = JsonParser().parse(uglyJson)
         val prettyJson = gson.toJson(root)
 

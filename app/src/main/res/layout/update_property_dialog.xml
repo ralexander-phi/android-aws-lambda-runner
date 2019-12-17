@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="10dp"
+    android:orientation="vertical"
+    android:padding="10dp"
+    android:background="@color/colorRaisedSurface"
+    >
+
+    <TextView
+        android:id="@+id/key_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Key"
+        />
+
+    <EditText
+        android:id="@+id/key_value"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Foo"
+        android:inputType="text"
+        android:maxLines="1"
+        />
+
+    <TextView
+        android:id="@+id/json_type_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="25dp"
+        android:text="Type"
+        />
+
+    <Spinner
+        android:id="@+id/json_type"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        />
+
+    <TextView
+        android:id="@+id/json_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="25dp"
+        android:text="Value"
+        />
+
+    <RelativeLayout
+        android:id="@+id/value_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        >
+
+        <TextView
+            android:id="@+id/object_textview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@+id/edit"
+            android:layout_alignTop="@+id/edit"
+            android:layout_marginTop="10dp"
+            android:text="Foo"
+            android:inputType="text"
+            android:maxLines="1"
+            />
+
+        <TextView
+            android:id="@+id/array_textview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@+id/edit"
+            android:layout_alignTop="@+id/edit"
+            android:layout_marginTop="10dp"
+            android:text="Foo"
+            android:inputType="text"
+            android:maxLines="1"
+            />
+
+        <ImageButton
+            android:id="@+id/edit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:src="@drawable/pencil"
+            android:tint="#fff"
+            />
+
+        <ToggleButton
+            android:id="@+id/boolean_toggle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textOn="true"
+            android:textOff="false"
+            android:checked="true"
+            />
+
+        <EditText
+            android:id="@+id/string_edit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="foo"
+            android:inputType="text"
+            android:maxLines="1"
+            />
+
+        <EditText
+            android:id="@+id/number_edit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="foo"
+            android:inputType="numberDecimal|numberSigned"
+            />
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="25dp"
+        android:layout_margin="10dp"
+        >
+
+        <Button
+            android:id="@+id/cancel_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:text="Cancel"
+            />
+
+        <Button
+            android:id="@+id/remove_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:text="Remove"
+            />
+
+
+        <Button
+            android:id="@+id/save_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:text="Save"
+            android:theme="@style/PrimaryButton"
+            />
+    </RelativeLayout>
+</LinearLayout>

@@ -55,7 +55,15 @@
             android:name=".ui.run_lambda.RunLambdaActivity"
             android:label="Function Runner"
             android:parentActivityName=".ui.list_functions.ListFunctionsActivity"
-            />
+            android:windowSoftInputMode="adjustResize"
+            >
+        </activity>
+
+        <activity
+            android:name=".ui.edit_json.EditJsonActivity"
+            android:label="Edit JSON"
+            android:parentActivityName=".ui.list_functions.ListFunctionsActivity">
+        </activity>
 
         <activity
             android:name=".ui.view_results.ViewResultsActivity"

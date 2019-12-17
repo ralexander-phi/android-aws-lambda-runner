@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/colorRaisedSurface"
+    >
+
+    <TextView
+        android:id="@+id/key"
+        android:layout_width="120dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_centerVertical="true"
+        android:layout_margin="4dp"
+        android:padding="10dp"
+        android:text="MyKey"
+        android:inputType="text"
+        android:maxLines="1"
+        android:background="@color/colorRaisedSurface2"
+        />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@+id/key"
+        android:layout_centerVertical="true"
+        android:layout_margin="4dp"
+        android:padding="10dp"
+        android:background="@color/colorRaisedSurface2"
+        >
+        <ImageButton
+            android:id="@+id/icon"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:src="@drawable/ic__boolean"
+            android:background="@color/colorRaisedSurface2"
+            android:paddingRight="12dp"
+            />
+        <TextView
+            android:id="@+id/json_value"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="[1, 2, 3, 4]"
+            android:inputType="text"
+            android:maxLines="1"
+            />
+    </LinearLayout>
+
+</RelativeLayout>

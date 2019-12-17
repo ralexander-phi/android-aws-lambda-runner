@@ -33,7 +33,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/region_textview"
             android:layout_alignParentLeft="true"
-            android:layout_margin="20dp"
+            android:layout_margin="10dp"
             android:padding="10dp"
             />
 
@@ -43,7 +43,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/region_textview"
             android:layout_toRightOf="@+id/region_group"
-            android:layout_margin="20dp"
+            android:layout_margin="10dp"
             android:padding="10dp"
             />
 
