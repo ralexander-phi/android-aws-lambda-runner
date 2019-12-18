@@ -84,7 +84,7 @@ class RunLambdaActivity: AppCompatActivity() {
         } else if (region == null || functionName == null) {
             startActivity(Intent(this, ListFunctionsActivity::class.java))
         } else {
-            findViewById<Toolbar>(R.id.toolbar)?.title = functionName
+            supportActionBar?.title = functionName
             editButton = findViewById<Button>(R.id.edit_json).also {
                 it.setOnClickListener {
                     val intent = Intent(this, EditJsonActivity::class.java)

@@ -54,7 +54,6 @@
 
         <activity
             android:name=".ui.run_lambda.RunLambdaActivity"
-            android:label="Function Runner"
             android:parentActivityName=".ui.list_functions.ListFunctionsActivity"
             android:windowSoftInputMode="adjustResize"
             >
