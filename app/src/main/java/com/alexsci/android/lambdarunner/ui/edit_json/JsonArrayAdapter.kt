@@ -1,6 +1,7 @@
 package com.alexsci.android.lambdarunner.ui.edit_json
 
 import android.content.Context
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,6 +18,8 @@ class JsonArrayItemViewHolder(
 ): RecyclerView.ViewHolder(view) {
     val icon: ImageButton = view.findViewById(R.id.icon)
     val jsonValue: TextView = view.findViewById(R.id.json_value)
+    val upButton: ImageButton = view.findViewById(R.id.up)
+    val downButton: ImageButton = view.findViewById(R.id.down)
 }
 
 class JsonArrayAdapter(
@@ -55,6 +58,38 @@ class JsonArrayAdapter(
         holder.icon.setOnClickListener(onClickListener)
 
         holder.icon.setImageResource(JsonType.of(element).imageButtonIcon)
+
+        holder.upButton.also {
+            if (position == 0) {
+                it.setColorFilter(Color.GRAY)
+                it.setOnClickListener(null)
+            } else {
+                it.setColorFilter(Color.DKGRAY)
+                it.setOnClickListener {
+                    // Swap this item with the one above it
+                    val tmp = contents[position-1]
+                    contents[position-1] = contents[position]
+                    contents[position] = tmp
+                    notifyItemRangeChanged(position-1, 2)
+                }
+            }
+        }
+
+        holder.downButton.also {
+            if (position == contents.size-1) {
+                it.setColorFilter(Color.GRAY)
+                it.setOnClickListener(null)
+            } else {
+                it.setColorFilter(Color.DKGRAY)
+                it.setOnClickListener {
+                    // Swap this item with the one below it
+                    val tmp = contents[position+1]
+                    contents[position+1] = contents[position]
+                    contents[position] = tmp
+                    notifyItemRangeChanged(position, 2)
+                }
+            }
+        }
     }
 
     override fun getItemId(position: Int): Long = position.toLong()
