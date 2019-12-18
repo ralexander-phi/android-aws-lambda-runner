@@ -1,9 +1,7 @@
 package com.alexsci.android.lambdarunner.ui.common
 
 import android.view.View
-import android.widget.Button
 import android.widget.ImageButton
-import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.alexsci.android.lambdarunner.R

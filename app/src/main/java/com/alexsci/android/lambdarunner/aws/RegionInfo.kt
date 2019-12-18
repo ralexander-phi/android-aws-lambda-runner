@@ -5,7 +5,7 @@ import java.util.*
 
 class RegionInfo {
     companion object {
-        const val ALL_REGIONS_GROUP = "All Regions"
+        private const val ALL_REGIONS_GROUP = "All Regions"
 
         private val displayNames: Map<String, Map<String, String>> = mapOf(
             "United States" to mapOf(

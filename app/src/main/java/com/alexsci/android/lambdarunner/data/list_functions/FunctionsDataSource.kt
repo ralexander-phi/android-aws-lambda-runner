@@ -1,16 +1,11 @@
 package com.alexsci.android.lambdarunner.data.list_functions
 
 import android.content.Context
-import android.os.AsyncTask
-import android.widget.Toast
 import arrow.core.Either
-import com.alexsci.android.lambdarunner.aws.lambda.LambdaClient
 import com.alexsci.android.lambdarunner.aws.lambda.LambdaClientBuilder
 import com.alexsci.android.lambdarunner.aws.lambda.ListFunctionsRequest
 import com.alexsci.android.lambdarunner.data.list_functions.model.Function
 import com.amazonaws.AmazonClientException
-import com.amazonaws.AmazonServiceException
-import java.lang.Exception
 
 class FunctionsDataSource(private val context: Context) {
     fun listFunctions(accessKeyId: String, region: String) : Either<AmazonClientException, MutableList<Function>> {

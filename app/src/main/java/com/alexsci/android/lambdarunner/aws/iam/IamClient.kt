@@ -74,8 +74,7 @@ class GetUserResponseHandler : BaseResponseHandler<AmazonWebServiceResponse<GetU
         }
     }
 
-    private class GetUserContentHandler(
-    ) : ContentHandler {
+    private class GetUserContentHandler: ContentHandler {
 
         lateinit var response: GetUserResponse
         private lateinit var responseBuilder: GetUserResponse.Builder
@@ -180,7 +179,7 @@ class GetUserResult private constructor(
 }
 
 class ResponseMetadata private constructor(
-    val requestId: String
+    private val requestId: String
 ) {
     data class Builder(
         var requestId: String? = null
@@ -194,7 +193,7 @@ class ResponseMetadata private constructor(
     fun asAwsType() : com.amazonaws.ResponseMetadata {
         val map = HashMap<String, String>()
         map[com.amazonaws.ResponseMetadata.AWS_REQUEST_ID] = requestId
-        return com.amazonaws.ResponseMetadata(map)
+        return ResponseMetadata(map)
     }
 }
 

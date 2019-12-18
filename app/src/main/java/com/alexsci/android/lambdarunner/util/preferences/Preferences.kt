@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import com.alexsci.android.lambdarunner.SHARED_PREFERENCE_FILE_SELECTED
 
-class PreferencesUtil(private val context: Context) {
+class PreferencesUtil(context: Context) {
     private val preferences = context.getSharedPreferences(SHARED_PREFERENCE_FILE_SELECTED, MODE_PRIVATE)
 
     /**

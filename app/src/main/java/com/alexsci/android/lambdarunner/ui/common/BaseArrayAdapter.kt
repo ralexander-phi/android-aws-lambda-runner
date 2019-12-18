@@ -1,7 +1,6 @@
 package com.alexsci.android.lambdarunner.ui.common
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.alexsci.android.lambdarunner.R

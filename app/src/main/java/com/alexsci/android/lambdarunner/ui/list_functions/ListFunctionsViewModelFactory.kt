@@ -3,7 +3,6 @@ package com.alexsci.android.lambdarunner.ui.list_functions
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.alexsci.android.lambdarunner.aws.lambda.LambdaClient
 import com.alexsci.android.lambdarunner.data.list_functions.FunctionsDataSource
 import com.alexsci.android.lambdarunner.data.list_functions.FunctionsRepository
 

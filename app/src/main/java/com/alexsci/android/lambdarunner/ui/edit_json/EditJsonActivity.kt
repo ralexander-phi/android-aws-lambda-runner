@@ -125,7 +125,7 @@ class EditJsonActivity: AppCompatActivity() {
         }
     }
 
-    protected fun onDoneEditing() {
+    private fun onDoneEditing() {
         val intent = Intent()
         intent.putExtra(JSON_EXTRA, getUpdatedJsonRoot().toString())
         setResult(Activity.RESULT_OK, intent)
@@ -133,12 +133,10 @@ class EditJsonActivity: AppCompatActivity() {
     }
 
     private fun isObjectView(): Boolean {
-        if (jsonViewRoot.isJsonObject) {
-            return true
-        } else if (jsonViewRoot.isJsonArray) {
-            return false
-        } else {
-            throw RuntimeException("Unexpected")
+        return when {
+            jsonViewRoot.isJsonObject -> true
+            jsonViewRoot.isJsonArray -> false
+            else -> throw RuntimeException("Unexpected")
         }
     }
 
@@ -199,7 +197,7 @@ class EditJsonActivity: AppCompatActivity() {
         changeView(getUpdatedJsonRoot().toString(), path)
     }
 
-    fun getUpdatedJsonRoot(): JsonElement {
+    private fun getUpdatedJsonRoot(): JsonElement {
         return if (isObjectView()) {
             objectContentsAdapter.getUpdatedJsonRoot()
         } else {

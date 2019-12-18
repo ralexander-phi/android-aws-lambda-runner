@@ -15,7 +15,6 @@
         android:layout_margin="4dp"
         android:padding="10dp"
         android:text="MyKey"
-        android:inputType="text"
         android:maxLines="1"
         android:background="@color/colorRaisedSurface2"
         />
@@ -42,7 +41,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="[1, 2, 3, 4]"
-            android:inputType="text"
             android:maxLines="1"
             />
     </LinearLayout>

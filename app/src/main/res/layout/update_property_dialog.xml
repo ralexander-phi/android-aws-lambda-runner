@@ -60,7 +60,6 @@
             android:layout_alignTop="@+id/edit"
             android:layout_marginTop="10dp"
             android:text="Foo"
-            android:inputType="text"
             android:maxLines="1"
             />
 
@@ -72,7 +71,6 @@
             android:layout_alignTop="@+id/edit"
             android:layout_marginTop="10dp"
             android:text="Foo"
-            android:inputType="text"
             android:maxLines="1"
             />
 

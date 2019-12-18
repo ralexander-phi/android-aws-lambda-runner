@@ -2,13 +2,9 @@ package com.alexsci.android.lambdarunner.data.list_keys
 
 import com.alexsci.android.lambdarunner.data.list_keys.model.Key
 
-class KeysRepository(val dataSource: KeysDataSource) {
-    var functions: List<Key>? = null
-        private set
-
+class KeysRepository(private val dataSource: KeysDataSource) {
     fun list(): List<Key>? {
-        functions = dataSource.listKeys()
-        return functions
+        return dataSource.listKeys()
     }
 
     fun remove(key: Key) {

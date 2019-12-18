@@ -172,12 +172,12 @@ class ListFunctionsResponseHandler : BaseResponseHandler<AmazonWebServiceRespons
         val functionsArray = rootObject.getAsJsonArray("Functions")
 
         val nextMarkerObject = rootObject.get("NextMarker")
-        val nextMarkerString : String?
-        if (nextMarkerObject.isJsonNull) {
-            nextMarkerString = null
-        } else {
-            nextMarkerString = nextMarkerObject.asJsonPrimitive.asString
-        }
+        val nextMarkerString : String? =
+            if (nextMarkerObject.isJsonNull) {
+                null
+            } else {
+                nextMarkerObject.asJsonPrimitive.asString
+            }
 
         val functionsList = ArrayList<Function>(functionsArray.size())
         for (function in functionsArray) {

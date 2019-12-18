@@ -9,34 +9,30 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.AsyncTask
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
-import androidx.annotation.StringRes
-import androidx.appcompat.app.AppCompatActivity
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
-import android.view.ContextThemeWrapper
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.*
+import androidx.annotation.StringRes
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import arrow.core.Either
-import com.alexsci.android.lambdarunner.BuildConfig
-
 import com.alexsci.android.lambdarunner.R
 import com.alexsci.android.lambdarunner.SHARED_PREFERENCE_SHOW_QR_CODE_HELP
 import com.alexsci.android.lambdarunner.aws.iam.IamClient
 import com.alexsci.android.lambdarunner.ui.common.ToolbarHelper
-import com.alexsci.android.lambdarunner.util.crypto.*
+import com.alexsci.android.lambdarunner.util.crypto.KeyManagement
 import com.alexsci.android.lambdarunner.util.preferences.PreferencesUtil
 import com.amazonaws.AmazonClientException
-import com.amazonaws.AmazonServiceException
 import com.amazonaws.auth.BasicAWSCredentials
 import com.amazonaws.internal.StaticCredentialsProvider
 import com.google.android.gms.vision.Frame
@@ -44,6 +40,7 @@ import com.google.android.gms.vision.barcode.Barcode
 import com.google.android.gms.vision.barcode.BarcodeDetector
 import java.io.File
 import java.io.FileNotFoundException
+import kotlin.math.min
 
 data class SaveKeyTaskParams(val accessKey: String, val secretKey: String)
 
@@ -221,7 +218,7 @@ class AddKeyActivity : AppCompatActivity() {
                 try {
                     val bitmap = decodeBitmapUri(this, imageUri)
                     if (detector.isOperational && bitmap != null) {
-                        val frame = Frame.Builder().setBitmap(bitmap!!).build()
+                        val frame = Frame.Builder().setBitmap(bitmap).build()
                         val barcodes = detector.detect(frame)
                         for (index in 0 until barcodes.size()) {
                             val code = barcodes.valueAt(index)
@@ -261,7 +258,7 @@ class AddKeyActivity : AppCompatActivity() {
         BitmapFactory.decodeStream(ctx.contentResolver.openInputStream(uri), null, bmOptions)
         val photoW = bmOptions.outWidth
         val photoH = bmOptions.outHeight
-        val scaleFactor = Math.min(photoW / targetW, photoH / targetH)
+        val scaleFactor = min(photoW / targetW, photoH / targetH)
         bmOptions.inJustDecodeBounds = false
         bmOptions.inSampleSize = scaleFactor
         return BitmapFactory.decodeStream(

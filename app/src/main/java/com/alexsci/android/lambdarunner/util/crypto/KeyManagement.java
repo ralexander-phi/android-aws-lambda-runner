@@ -14,10 +14,8 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.KeyStore;
-import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -128,10 +126,6 @@ public class KeyManagement {
 
     private Key getRootKey() throws GeneralSecurityException {
         return keyStore.getKey(ROOT_KEY, null);
-    }
-
-    public Collection<String> listKeys() {
-        return sharedPreferences.getAll().keySet();
     }
 
     public Iterable<EncryptedCredentialInformation> describeKeys() throws GeneralSecurityException {

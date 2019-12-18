@@ -3,7 +3,6 @@ package com.alexsci.android.lambdarunner.ui.view_results
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -13,7 +12,6 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.alexsci.android.lambdarunner.R
 import com.alexsci.android.lambdarunner.ui.common.ToolbarHelper
-import com.alexsci.android.lambdarunner.ui.list_functions.ListFunctionsActivity
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonParser
 

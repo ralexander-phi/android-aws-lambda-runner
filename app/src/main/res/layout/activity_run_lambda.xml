@@ -15,6 +15,7 @@
         android:layout_above="@+id/error_message"
         android:gravity="top|left"
         android:padding="12dp"
+        android:inputType="text|textMultiLine"
         />
 
     <TextView
@@ -23,6 +24,7 @@
         android:layout_height="wrap_content"
         android:layout_above="@+id/invoke"
         android:text="Error Message"
+        android:padding="12dp"
         />
 
     <Button
@@ -39,7 +41,6 @@
         android:text="Edit JSON"
         android:drawableTint="#fff"
         />
-
 
     <Button
         android:id="@+id/invoke"
