@@ -22,11 +22,7 @@ class ListKeysViewModel(private val keysRepository: KeysRepository) : ViewModel(
 
     private open inner class ListTask: AsyncTask<Void, Void, ListKeysResult>() {
         override fun doInBackground(vararg params: Void): ListKeysResult {
-            val keys = keysRepository.list()
-            if (keys != null) {
-                return ListKeysResult(KeyListView(keys), null)
-            }
-            return ListKeysResult(null, 0) // TODO
+            return ListKeysResult(KeyListView(keysRepository.list()), null)
         }
 
         override fun onPostExecute(listKeysResult: ListKeysResult?) {

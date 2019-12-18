@@ -129,7 +129,6 @@ class RunLambdaActivity: AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
 
         if (requestCode == EditJsonActivity.REQUEST_CODE_EDIT && resultCode == Activity.RESULT_OK) {
-            // TODO formatting
             if (data != null && data.hasExtra(EditJsonActivity.JSON_EXTRA)) {
                 val jsonText = data.getStringExtra(EditJsonActivity.JSON_EXTRA)
                 setJsonText(jsonText)
