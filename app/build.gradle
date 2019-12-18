@@ -43,6 +43,7 @@ dependencies {
     implementation 'com.google.guava:guava:28.1-android'
     implementation 'com.google.http-client:google-http-client-gson:1.19.0'
     implementation 'io.arrow-kt:arrow-core:0.10.3'
+    implementation 'info.androidhive:barcode-reader:1.1.5'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'

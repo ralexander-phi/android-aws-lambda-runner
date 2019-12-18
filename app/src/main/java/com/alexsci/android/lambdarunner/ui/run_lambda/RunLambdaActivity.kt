@@ -126,6 +126,8 @@ class RunLambdaActivity: AppCompatActivity() {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
         if (requestCode == EditJsonActivity.REQUEST_CODE_EDIT && resultCode == Activity.RESULT_OK) {
             // TODO formatting
             if (data != null && data.hasExtra(EditJsonActivity.JSON_EXTRA)) {

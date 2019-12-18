@@ -8,6 +8,18 @@
     <string name="empty_key_list">No credentials found.\nTry adding one below.</string>
     <string name="login_failed">Saving credential failed</string>
 
+    <!-- Add Keys -->
+    <string name="qr_code_help">
+        &lt;p>
+        Create a QR code that contains you access AWS access key ID and secret access key separated by a new line.
+        &lt;/p>
+        &lt;p>
+        &lt;a href=https://alexsci.com/android-apps/aws-lambda-invoker/qr-code-credentials.html>
+        Read more
+        &lt;/a>
+        &lt;/p>
+    </string>
+
     <string-array name="JSON_Types">
         <item>Object</item>
         <item>Array</item>

@@ -8,6 +8,7 @@
         android:required="false"/>
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.CAMERA" />
 
     <!-- for QR scanner -->
     <uses-permission
@@ -70,18 +71,6 @@
             android:label="View Result"
             android:parentActivityName=".ui.run_lambda.RunLambdaActivity"
             />
-
-        <!--
-        <activity
-            android:name=".ui.edit_json.EditJsonActivity"
-            android:label="@string/app_name">
-            <intent-filter>
-                <action android:name="android.intent.action.EDIT" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="application/json" />
-            </intent-filter>
-        </activity>
-        -->
 
         <provider
             android:name="androidx.core.content.FileProvider"

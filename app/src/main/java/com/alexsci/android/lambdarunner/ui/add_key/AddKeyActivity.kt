@@ -2,32 +2,28 @@ package com.alexsci.android.lambdarunner.ui.add_key
 
 import android.app.Activity
 import android.app.AlertDialog
-import android.content.Context
-import android.content.Intent
-import android.content.pm.PackageManager
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.net.Uri
 import android.os.AsyncTask
+import android.os.Build
 import android.os.Bundle
-import android.os.Environment
-import android.provider.MediaStore
 import android.text.Editable
+import android.text.Html
+import android.text.Html.FROM_HTML_MODE_COMPACT
 import android.text.TextWatcher
-import android.util.Log
+import android.text.method.LinkMovementMethod
+import android.util.SparseArray
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
 import android.view.inputmethod.EditorInfo
-import android.widget.*
+import android.widget.Button
+import android.widget.EditText
+import android.widget.TextView
+import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.FileProvider
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import arrow.core.Either
 import com.alexsci.android.lambdarunner.R
-import com.alexsci.android.lambdarunner.SHARED_PREFERENCE_SHOW_QR_CODE_HELP
 import com.alexsci.android.lambdarunner.aws.iam.IamClient
 import com.alexsci.android.lambdarunner.ui.common.ToolbarHelper
 import com.alexsci.android.lambdarunner.util.crypto.KeyManagement
@@ -35,37 +31,26 @@ import com.alexsci.android.lambdarunner.util.preferences.PreferencesUtil
 import com.amazonaws.AmazonClientException
 import com.amazonaws.auth.BasicAWSCredentials
 import com.amazonaws.internal.StaticCredentialsProvider
-import com.google.android.gms.vision.Frame
 import com.google.android.gms.vision.barcode.Barcode
-import com.google.android.gms.vision.barcode.BarcodeDetector
-import java.io.File
-import java.io.FileNotFoundException
-import kotlin.math.min
+import info.androidhive.barcode.BarcodeReader
 
 data class SaveKeyTaskParams(val accessKey: String, val secretKey: String)
 
-
-class AddKeyActivity : AppCompatActivity() {
+class AddKeyActivity: AppCompatActivity(), BarcodeReader.BarcodeReaderListener {
 
     companion object {
-        const val PHOTO_REQUEST = 10
         const val LOG_TAG = "AddKeyActivity"
     }
 
     private lateinit var loginViewModel: LoginViewModel
-    private lateinit var imageUri: Uri
-    private lateinit var detector: BarcodeDetector
     private lateinit var accessKeyIdEditText: EditText
     private lateinit var secretAccessKeyEditText: EditText
 
     private lateinit var preferencesUtil: PreferencesUtil
+    private lateinit var barcodeReader: BarcodeReader
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        detector = BarcodeDetector.Builder(applicationContext)
-            .setBarcodeFormats(Barcode.DATA_MATRIX or Barcode.QR_CODE)
-            .build()
 
         setContentView(R.layout.activity_add_key)
         setSupportActionBar(findViewById(R.id.toolbar))
@@ -76,7 +61,6 @@ class AddKeyActivity : AppCompatActivity() {
 
         val loginButton = findViewById<Button>(R.id.login)
         val scanQrButton = findViewById<Button>(R.id.scan_qr)
-        val loading = findViewById<ProgressBar>(R.id.loading)
 
         preferencesUtil = PreferencesUtil(this)
 
@@ -102,7 +86,6 @@ class AddKeyActivity : AppCompatActivity() {
         loginViewModel.loginResult.observe(this@AddKeyActivity, Observer {
             val loginResult = it ?: return@Observer
 
-            loading.visibility = View.GONE
             if (loginResult.error != null) {
                 showLoginFailed(loginResult.error)
             }
@@ -145,27 +128,18 @@ class AddKeyActivity : AppCompatActivity() {
             }
 
             loginButton.setOnClickListener {
-                loading.visibility = View.VISIBLE
                 loginViewModel.login(
                     accessKeyIdEditText.text.toString(),
                     secretAccessKeyEditText.text.toString()
                 )
             }
 
-            if (canTakePicture()) {
-                scanQrButton.setOnClickListener {
-                    val showHint = preferencesUtil.getBoolean(SHARED_PREFERENCE_SHOW_QR_CODE_HELP, true)
-
-                    if (showHint) {
-                        showQRCodeHint()
-                    } else {
-                        takePicture()
-                    }
-                }
-            } else {
-                scanQrButton.visibility = View.GONE
+            scanQrButton.setOnClickListener {
+                showQRCodeHint()
             }
         }
+
+        barcodeReader = supportFragmentManager.findFragmentById(R.id.barcode_fragment) as BarcodeReader
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -185,111 +159,14 @@ class AddKeyActivity : AppCompatActivity() {
     private fun showQRCodeHint() {
         val builder = AlertDialog.Builder(this)
         val view = layoutInflater.inflate(R.layout.qr_code_help_view, null)
+        view.findViewById<TextView>(R.id.help_text).also {
+            it.text = Html.fromHtml(resources.getString(R.string.qr_code_help))
+            it.movementMethod = LinkMovementMethod.getInstance()
+        }
         builder.setView(view)
         builder.setMessage("Load credentials via QR code")
-        builder.setPositiveButton("Continue") { dialog, _ ->
-            val showHelp = view.findViewById<Switch>(R.id.show_help).isChecked
-            if (!showHelp) {
-                preferencesUtil.setBoolean(SHARED_PREFERENCE_SHOW_QR_CODE_HELP, false)
-            }
-            dialog.dismiss()
-            takePicture()
-        }
-        builder.setNegativeButton("Cancel") { dialog, _ ->
-            val showHelp = view.findViewById<Switch>(R.id.show_help).isChecked
-            if (!showHelp) {
-                preferencesUtil.setBoolean(SHARED_PREFERENCE_SHOW_QR_CODE_HELP, false)
-            }
-            dialog.dismiss()
-        }
+        builder.setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
         builder.create().show()
-    }
-
-    private fun launchMediaScanIntent() {
-        val mediaScanIntent = Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE)
-        mediaScanIntent.data = imageUri
-        this.sendBroadcast(mediaScanIntent)
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (requestCode == PHOTO_REQUEST && resultCode == Activity.RESULT_OK) {
-            try {
-                launchMediaScanIntent()
-                try {
-                    val bitmap = decodeBitmapUri(this, imageUri)
-                    if (detector.isOperational && bitmap != null) {
-                        val frame = Frame.Builder().setBitmap(bitmap).build()
-                        val barcodes = detector.detect(frame)
-                        for (index in 0 until barcodes.size()) {
-                            val code = barcodes.valueAt(index)
-                            Log.i(LOG_TAG, code.rawValue)
-                            val parts = code.rawValue.split("\n")
-                            accessKeyIdEditText.setText(parts[0])
-                            secretAccessKeyEditText.setText(parts[1])
-                        }
-                        if (barcodes.size() == 0) {
-                            Toast.makeText(
-                                this,
-                                "Scan Failed: Found nothing to scan",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                    } else {
-                        Toast.makeText(this, "Could not set up the detector!", Toast.LENGTH_SHORT)
-                            .show()
-                    }
-                } catch (e: Exception) {
-                    Toast.makeText(this, "Failed to load Image", Toast.LENGTH_SHORT).show()
-                    Log.e(LOG_TAG, e.toString())
-                }
-            } finally {
-                // Cleanup the old photo (remove the creds)
-                picturePath().delete()
-            }
-        }
-    }
-
-    @Throws(FileNotFoundException::class)
-    private fun decodeBitmapUri(ctx: Context, uri: Uri): Bitmap? {
-        val targetW = 600
-        val targetH = 600
-        val bmOptions = BitmapFactory.Options()
-        bmOptions.inJustDecodeBounds = true
-        BitmapFactory.decodeStream(ctx.contentResolver.openInputStream(uri), null, bmOptions)
-        val photoW = bmOptions.outWidth
-        val photoH = bmOptions.outHeight
-        val scaleFactor = min(photoW / targetW, photoH / targetH)
-        bmOptions.inJustDecodeBounds = false
-        bmOptions.inSampleSize = scaleFactor
-        return BitmapFactory.decodeStream(
-            ctx.contentResolver
-                .openInputStream(uri), null, bmOptions
-        )
-    }
-
-    private fun canTakePicture(): Boolean {
-        val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-        return packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY) &&
-                intent.resolveActivity(packageManager) != null
-    }
-
-    private fun takePicture() {
-        val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-        val picPath = picturePath()
-
-        imageUri = FileProvider.getUriForFile(
-            AddKeyActivity@this,
-            applicationContext.packageName + ".provider",
-            picPath
-        )
-
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri)
-        startActivityForResult(intent, PHOTO_REQUEST)
-    }
-
-    private fun picturePath(): File {
-        val storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
-        return File.createTempFile("qr-code", ".jpg", storageDir).absoluteFile
     }
 
     private fun showLoginFailed(@StringRes errorString: Int) {
@@ -337,6 +214,35 @@ class AddKeyActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    override fun onBitmapScanned(sparseArray: SparseArray<Barcode>?) {}
+    override fun onScannedMultiple(barcodes: MutableList<Barcode>?) {}
+
+    override fun onScanned(barcode: Barcode?) {
+        val scannedText = barcode?.rawValue
+        if (scannedText != null && scannedText.contains("\n")) {
+            val parts = scannedText.split("\n")
+            if (parts.size >= 2) {
+                runOnUiThread {
+                    accessKeyIdEditText.setText(parts[0])
+                    secretAccessKeyEditText.setText(parts[1])
+                }
+                return
+            }
+        }
+
+        runOnUiThread {
+            showQRCodeHint()
+        }
+    }
+
+    override fun onCameraPermissionDenied() {
+        Toast.makeText(applicationContext, "Camera permission was not granted", Toast.LENGTH_SHORT).show()
+    }
+
+    override fun onScanError(errorMessage: String?) {
+        Toast.makeText(applicationContext, errorMessage, Toast.LENGTH_SHORT).show()
     }
 }
 
