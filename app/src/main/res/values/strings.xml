@@ -14,7 +14,7 @@
         Create a QR code that contains you access AWS access key ID and secret access key separated by a new line.
         &lt;/p>
         &lt;p>
-        &lt;a href=https://alexsci.com/android-apps/aws-lambda-invoker/qr-code-credentials.html>
+        &lt;a href=https://alexsci.com/android-apps/aws-lambda-invoker/getting-started.html#load_credentials>
         Read more
         &lt;/a>
         &lt;/p>
