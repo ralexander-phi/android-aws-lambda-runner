@@ -1,10 +1,12 @@
 package com.alexsci.android.lambdarunner.ui.edit_json
 
 import android.content.Context
+import android.text.Layout
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
+import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
@@ -19,6 +21,8 @@ class JsonPropertyViewHolder(
     val keyText: TextView = view.findViewById(R.id.key)
     val icon: ImageButton = view.findViewById(R.id.icon)
     val jsonValue: TextView = view.findViewById(R.id.json_value)
+    val valueContainer: LinearLayout = view.findViewById(R.id.value_container)
+    val propertyLayout: RelativeLayout = view.findViewById(R.id.property)
 }
 
 class JsonPropertyArrayAdapter(
@@ -50,14 +54,15 @@ class JsonPropertyArrayAdapter(
         holder.keyText.text = originalKey
         holder.jsonValue.text = jsonText
 
-        val onClickListener = View.OnClickListener {
-            EditObjectDialog(context).edit(originalKey, element, this@JsonPropertyArrayAdapter)
-        }
-
         // Tapping any of these will edit
-        holder.keyText.setOnClickListener(onClickListener)
-        holder.jsonValue.setOnClickListener(onClickListener)
-        holder.icon.setOnClickListener(onClickListener)
+        listOf(
+            holder.keyText, holder.jsonValue, holder.icon,
+            holder.valueContainer, holder.propertyLayout
+        ).forEach {
+            it.setOnClickListener {
+                EditObjectDialog(context).edit(originalKey, element, this@JsonPropertyArrayAdapter)
+            }
+        }
 
         holder.icon.setImageResource(JsonType.of(element).imageButtonIcon)
     }

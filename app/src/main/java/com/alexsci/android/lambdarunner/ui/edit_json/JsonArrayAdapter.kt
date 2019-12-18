@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
+import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
@@ -20,6 +21,8 @@ class JsonArrayItemViewHolder(
     val jsonValue: TextView = view.findViewById(R.id.json_value)
     val upButton: ImageButton = view.findViewById(R.id.up)
     val downButton: ImageButton = view.findViewById(R.id.down)
+    val valueContainer: RelativeLayout = view.findViewById(R.id.value_container)
+    val arrayItemLayout: RelativeLayout = view.findViewById(R.id.array_item)
 }
 
 class JsonArrayAdapter(
@@ -49,13 +52,14 @@ class JsonArrayAdapter(
 
         holder.jsonValue.text = jsonText
 
-        val onClickListener = View.OnClickListener {
-            EditArrayDialog(context).edit(position, element, this@JsonArrayAdapter)
-        }
-
         // Tapping any of these will edit
-        holder.jsonValue.setOnClickListener(onClickListener)
-        holder.icon.setOnClickListener(onClickListener)
+        listOf(
+            holder.jsonValue, holder.icon, holder.valueContainer, holder.arrayItemLayout
+        ).forEach {
+            it.setOnClickListener {
+                EditArrayDialog(context).edit(position, element, this@JsonArrayAdapter)
+            }
+        }
 
         holder.icon.setImageResource(JsonType.of(element).imageButtonIcon)
 

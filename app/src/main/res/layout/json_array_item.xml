@@ -1,17 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/array_item"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@color/colorRaisedSurface"
+    android:clickable="true"
+    android:focusable="true"
     >
+
     <RelativeLayout
+        android:id="@+id/value_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_margin="4dp"
         android:padding="10dp"
         android:background="@color/colorRaisedSurface2"
+        android:clickable="true"
+        android:focusable="true"
         >
 
         <ImageButton
@@ -22,6 +29,8 @@
             android:src="@drawable/ic__boolean"
             android:paddingRight="12dp"
             android:background="@color/colorRaisedSurface2"
+            android:clickable="true"
+            android:focusable="true"
             />
 
         <TextView
@@ -32,6 +41,8 @@
             android:layout_toLeftOf="@+id/up"
             android:text="[1, 2, 3, 4]"
             android:maxLines="1"
+            android:clickable="true"
+            android:focusable="true"
             />
 
         <ImageButton

@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/property"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@color/colorRaisedSurface"
+    android:clickable="true"
+    android:focusable="true"
     >
 
     <TextView
@@ -17,9 +20,12 @@
         android:text="MyKey"
         android:maxLines="1"
         android:background="@color/colorRaisedSurface2"
+        android:clickable="true"
+        android:focusable="true"
         />
 
     <LinearLayout
+        android:id="@+id/value_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_toRightOf="@+id/key"
@@ -27,6 +33,8 @@
         android:layout_margin="4dp"
         android:padding="10dp"
         android:background="@color/colorRaisedSurface2"
+        android:clickable="true"
+        android:focusable="true"
         >
         <ImageButton
             android:id="@+id/icon"
@@ -35,6 +43,8 @@
             android:src="@drawable/ic__boolean"
             android:background="@color/colorRaisedSurface2"
             android:paddingRight="12dp"
+            android:clickable="true"
+            android:focusable="true"
             />
         <TextView
             android:id="@+id/json_value"
@@ -42,6 +52,8 @@
             android:layout_height="wrap_content"
             android:text="[1, 2, 3, 4]"
             android:maxLines="1"
+            android:clickable="true"
+            android:focusable="true"
             />
     </LinearLayout>
 
