@@ -17,7 +17,7 @@ class Helpers {
             writer.setIndent(" ")
             writer.isLenient = true // Allow non object/array root elements
             Streams.write(element, writer)
-            return str.toString()
+            return str.toString().replace("\n", "")
         }
 
         fun showViews(vararg view: View) {
