@@ -1,6 +1,6 @@
 package com.alexsci.android.lambdarunner.data.list_keys.model
 
 data class Key(
-    val keyName: String,
-    val description: String
+    val humanReadableName: String,
+    val keyId: String
 )

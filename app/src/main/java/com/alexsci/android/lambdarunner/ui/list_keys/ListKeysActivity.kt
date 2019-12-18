@@ -97,11 +97,11 @@ class ListKeysActivity: BaseListActivity() {
             val currentItem = holder.t!!
             val context = holder.view.context
 
-            holder.title.text = currentItem.keyName
-            holder.description.text = currentItem.description
+            holder.title.text = currentItem.humanReadableName
+            holder.description.text = currentItem.keyId
 
             holder.run.setOnClickListener {
-                val accessKeyId = currentItem.keyName
+                val accessKeyId = currentItem.keyId
                 preferences.set(SHARED_PREFERENCE_ACCESS_KEY_ID, accessKeyId)
                 context.startActivity(Intent(context, ListFunctionsActivity::class.java))
             }

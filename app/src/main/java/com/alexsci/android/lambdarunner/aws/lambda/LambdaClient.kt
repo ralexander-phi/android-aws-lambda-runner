@@ -1,8 +1,6 @@
 package com.alexsci.android.lambdarunner.aws.lambda
 
 import android.content.Context
-import android.os.Parcel
-import android.os.Parcelable
 import arrow.core.Either
 import com.alexsci.android.lambdarunner.aws.base.*
 import com.alexsci.android.lambdarunner.util.crypto.KeyManagement
@@ -19,7 +17,6 @@ import com.amazonaws.http.HttpResponse
 import com.amazonaws.internal.StaticCredentialsProvider
 import com.amazonaws.regions.Region
 import com.google.gson.JsonParser
-import java.io.Serializable
 import java.net.URI
 
 class LambdaClient(
@@ -106,7 +103,7 @@ class LambdaClientBuilder(
     private val region: String
 ) {
     fun getClient(context: Context) : LambdaClient {
-        val secretKey = KeyManagement.getInstance(context).getKey(accessKey)
+        val secretKey = KeyManagement.getInstance(context).getKeyById(accessKey)
         val creds = BasicAWSCredentials(accessKey, secretKey)
         val credsProvider = StaticCredentialsProvider(creds)
         return LambdaClient(credsProvider, Region.getRegion(region))

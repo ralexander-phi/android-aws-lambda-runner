@@ -18,6 +18,8 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
@@ -128,41 +130,47 @@ public class KeyManagement {
         return keyStore.getKey(ROOT_KEY, null);
     }
 
-    private void deleteRootKey() throws KeyStoreException {
-        Log.i("RAA", "Deleting root key...");
-        keyStore.deleteEntry(ROOT_KEY);
-        Log.i("RAA", "Deleted");
-    }
-
     public Collection<String> listKeys() {
         return sharedPreferences.getAll().keySet();
     }
 
-    public boolean addKey(String name, String description, String value) throws GeneralSecurityException {
-        EncryptedResult result = encrypt(value);
-        BasicCredentialInformation info = new BasicCredentialInformation(name, description, result.getIv(), result.getEncrypted());
-        return sharedPreferences.edit().putString(name, info.toJson()).commit();
-    }
-
-    public boolean hasKey(String name) {
-        return sharedPreferences.contains(name);
-    }
-
-    public BasicCredentialInformation describeKey(String name) throws GeneralSecurityException {
-        String storedValue = sharedPreferences.getString(name, null);
-        if (storedValue == null) {
-            throw new InvalidKeyException("Can't find " + name);
+    public Iterable<EncryptedCredentialInformation> describeKeys() throws GeneralSecurityException {
+        List<EncryptedCredentialInformation> output = new LinkedList<>();
+        for (String keyId : sharedPreferences.getAll().keySet()) {
+            output.add(describeKeyById(keyId));
         }
-        return new BasicCredentialInformation(storedValue);
+        return output;
     }
 
-    public String getKey(String name) throws GeneralSecurityException {
-        BasicCredentialInformation info = describeKey(name);
+    public boolean addKey(
+            String humanReadableName,
+            String keyId,
+            String secret
+    ) throws GeneralSecurityException {
+        EncryptedResult result = encrypt(secret);
+        EncryptedCredentialInformation info = new EncryptedCredentialInformation(
+                humanReadableName,
+                keyId,
+                result.getIv(), result.getEncrypted()
+        );
+        return sharedPreferences.edit().putString(keyId, info.toJson()).commit();
+    }
+
+    public EncryptedCredentialInformation describeKeyById(String keyId) throws GeneralSecurityException {
+        String storedValue = sharedPreferences.getString(keyId, null);
+        if (storedValue == null) {
+            throw new InvalidKeyException("Can't find " + keyId);
+        }
+        return EncryptedCredentialInformation.Companion.fromJson(storedValue);
+    }
+
+    public String getKeyById(String keyId) throws GeneralSecurityException {
+        EncryptedCredentialInformation info = describeKeyById(keyId);
         return decrypt(info.getIv(), info.getEncrypted());
     }
 
-    public boolean deleteKey(String name) {
-        return sharedPreferences.edit().remove(name).commit();
+    public boolean deleteKeyById(String keyId) {
+        return sharedPreferences.edit().remove(keyId).commit();
     }
 
     private Cipher getCipherInstance() throws GeneralSecurityException {

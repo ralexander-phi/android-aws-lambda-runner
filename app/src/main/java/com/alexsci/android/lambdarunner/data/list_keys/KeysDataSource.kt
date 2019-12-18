@@ -5,19 +5,11 @@ import com.alexsci.android.lambdarunner.util.crypto.KeyManagement
 
 class KeysDataSource(private val keyManagement: KeyManagement) {
     fun listKeys() : List<Key> {
-        val keyNames = keyManagement.listKeys()
-        val keyModels = ArrayList<Key>(keyNames.size)
-
-        for (keyName in keyNames) {
-            val info = keyManagement.describeKey(keyName)
-            keyModels.add(Key(info.name, info.description))
-        }
-
-        return keyModels
+        return keyManagement.describeKeys().map { Key(it.humanReadableName, it.keyId) }
     }
 
     fun remove(key: Key) {
-        keyManagement.deleteKey(key.keyName)
+        keyManagement.deleteKeyById(key.keyId)
     }
 }
 
