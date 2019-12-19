@@ -99,13 +99,6 @@ public class KeyManagement {
                             .setBlockModes(KEY_BLOCK_MODE)
                             .setEncryptionPaddings(KEY_PADDING);
 
-            // Need to handle fingerprint, iris, intelligentScan not enrolled to enable this
-            keyGenParameterSpecBuilder.setUserAuthenticationRequired(false);
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                keyGenParameterSpecBuilder.setUserPresenceRequired(true);
-            }
-
             final KeyGenParameterSpec keyGenParameterSpec = keyGenParameterSpecBuilder.build();
 
             keyGenerator.init(keyGenParameterSpec);
