@@ -11,7 +11,7 @@ android {
         applicationId "com.alexsci.android.lambdarunner"
         minSdkVersion 23
         targetSdkVersion 29
-        versionCode 2
+        versionCode 3
         versionName "1.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
