@@ -180,10 +180,17 @@ class RunLambdaActivity: AppCompatActivity() {
     }
 
     private fun setJsonText(uglyJson: String) {
-        val gson = GsonBuilder().setPrettyPrinting().serializeNulls().create()
-        val root = JsonParser().parse(uglyJson)
-        val prettyJson = gson.toJson(root)
-        jsonEditText.setText(prettyJson)
+        var text: String
+        try {
+            val gson = GsonBuilder().setPrettyPrinting().serializeNulls().create()
+            val root = JsonParser().parse(uglyJson)
+            val prettyJson = gson.toJson(root)
+            text = prettyJson
+        } catch (e: JsonSyntaxException) {
+            // It's not JSON, just show it as-is
+            text = uglyJson
+        }
+        jsonEditText.setText(text)
     }
 
     private inner class InvokeTask(
