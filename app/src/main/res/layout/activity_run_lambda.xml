@@ -47,7 +47,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_toLeftOf="@+id/invoke"
         android:layout_toRightOf="@+id/edit_json"
         android:layout_margin="10dp"
         android:elevation="10dp"
