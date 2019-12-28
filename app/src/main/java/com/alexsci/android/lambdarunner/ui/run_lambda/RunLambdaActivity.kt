@@ -44,7 +44,7 @@ class RunLambdaActivity: AppCompatActivity() {
     private lateinit var qrButton: Button
     private lateinit var errorMessage: TextView
 
-    private var lastKnownJson: String? = null
+    private var lastKnownText: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -71,7 +71,10 @@ class RunLambdaActivity: AppCompatActivity() {
                 override fun afterTextChanged(s: Editable?) {
                     if (s != null) {
                         try {
-                            onJsonValidationResult(Either.right(JsonParser().parse(s.toString())))
+                            val text = s.toString()
+                            lastKnownText = text
+                            val root = JsonParser().parse(text)
+                            onJsonValidationResult(Either.right(root))
                         } catch (e: JsonSyntaxException) {
                             onJsonValidationResult(Either.left(e))
                         }
@@ -158,23 +161,23 @@ class RunLambdaActivity: AppCompatActivity() {
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
 
-        outState.putString(SAVED_STATE_JSON, lastKnownJson)
+        outState.putString(SAVED_STATE_JSON, lastKnownText)
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
 
-        lastKnownJson = savedInstanceState.getString(SAVED_STATE_JSON)
+        lastKnownText = savedInstanceState.getString(SAVED_STATE_JSON)
     }
 
     override fun onPostCreate(savedInstanceState: Bundle?) {
         super.onPostCreate(savedInstanceState)
 
-        if (lastKnownJson == null) {
-            lastKnownJson = preferencesUtil.get(SHARED_PREFERENCE_LAST_USED_JSON, EMPTY_JSON_OBJECT_TEXT)
+        if (lastKnownText == null) {
+            lastKnownText = preferencesUtil.get(SHARED_PREFERENCE_LAST_USED_JSON, EMPTY_JSON_OBJECT_TEXT)
         }
 
-        setJsonText(lastKnownJson!!)
+        setJsonText(lastKnownText!!)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
