@@ -23,8 +23,6 @@ class EditJsonActivity: AppCompatActivity() {
 
         const val JSON_EXTRA = "json"
         const val EDIT_PATH_EXTRA = "edit_path"
-
-        const val REQUEST_CODE_EDIT = 100
     }
 
     // Which element should we show in the editor

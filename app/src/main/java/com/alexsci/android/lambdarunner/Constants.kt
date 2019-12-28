@@ -15,3 +15,8 @@ const val SHARED_PREFERENCE_LAST_USED_JSON = "LastUsedJson"
 
 const val ROOT_JQ_PATH = ""
 const val EMPTY_JSON_OBJECT_TEXT = "{}"
+
+enum class RequestCodes(val code: Int){
+    REQUEST_CODE_SCAN_QR(100),
+    REQUEST_CODE_EDIT_JSON(101)
+}

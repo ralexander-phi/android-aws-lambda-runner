@@ -80,7 +80,7 @@
                     android:layout_alignParentLeft="true"
                     android:drawableLeft="@drawable/qrcode_scan"
                     android:drawablePadding="10dp"
-                    android:text="QR Code Help"
+                    android:text="Scan QR Code"
                     />
 
                 <Button
@@ -95,16 +95,6 @@
                     />
 
             </RelativeLayout>
-
-            <fragment
-                android:id="@+id/barcode_fragment"
-                android:name="info.androidhive.barcode.BarcodeReader"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_below="@+id/buttons"
-                app:auto_focus="true"
-                app:use_flash="false"
-                />
 
         </RelativeLayout>
 

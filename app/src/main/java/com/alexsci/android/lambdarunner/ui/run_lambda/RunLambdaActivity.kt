@@ -14,7 +14,6 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.Toolbar
 import arrow.core.Either
 import com.alexsci.android.lambdarunner.*
 import com.alexsci.android.lambdarunner.aws.lambda.InvokeFunctionRequest
@@ -25,6 +24,7 @@ import com.alexsci.android.lambdarunner.ui.common.ToolbarHelper
 import com.alexsci.android.lambdarunner.ui.edit_json.EditJsonActivity
 import com.alexsci.android.lambdarunner.ui.list_functions.ListFunctionsActivity
 import com.alexsci.android.lambdarunner.ui.list_keys.ListKeysActivity
+import com.alexsci.android.lambdarunner.ui.scan_qr.ScanQRActivity
 import com.alexsci.android.lambdarunner.ui.view_results.ViewResultsActivity
 import com.alexsci.android.lambdarunner.util.preferences.PreferencesUtil
 import com.amazonaws.AmazonClientException
@@ -41,6 +41,7 @@ class RunLambdaActivity: AppCompatActivity() {
     private lateinit var preferencesUtil: PreferencesUtil
     private lateinit var jsonEditText: EditText
     private lateinit var editButton: Button
+    private lateinit var qrButton: Button
     private lateinit var errorMessage: TextView
 
     private var lastKnownJson: String? = null
@@ -89,7 +90,18 @@ class RunLambdaActivity: AppCompatActivity() {
                 it.setOnClickListener {
                     val intent = Intent(this, EditJsonActivity::class.java)
                     intent.putExtra(EditJsonActivity.JSON_EXTRA, jsonEditText.text.toString())
-                    startActivityForResult(intent, EditJsonActivity.REQUEST_CODE_EDIT)
+                    startActivityForResult(intent, RequestCodes.REQUEST_CODE_EDIT_JSON.code)
+                }
+            }
+
+            qrButton = findViewById<Button>(R.id.scan_qr).also {
+                it.setOnClickListener {
+                    val intent = Intent(this, ScanQRActivity::class.java)
+                    intent.putExtra(
+                        ScanQRActivity.SCAN_REQUIREMENTS_EXTRA,
+                        ScanQRActivity.ScanRequirements.IS_JSON.name
+                    )
+                    startActivityForResult(intent, RequestCodes.REQUEST_CODE_SCAN_QR.code)
                 }
             }
 
@@ -128,9 +140,16 @@ class RunLambdaActivity: AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        if (requestCode == EditJsonActivity.REQUEST_CODE_EDIT && resultCode == Activity.RESULT_OK) {
+        if (requestCode == RequestCodes.REQUEST_CODE_EDIT_JSON.code && resultCode == Activity.RESULT_OK) {
             if (data != null && data.hasExtra(EditJsonActivity.JSON_EXTRA)) {
                 val jsonText = data.getStringExtra(EditJsonActivity.JSON_EXTRA)
+                setJsonText(jsonText)
+            }
+        }
+
+        if (requestCode == RequestCodes.REQUEST_CODE_SCAN_QR.code && resultCode == Activity.RESULT_OK) {
+            if (data != null && data.hasExtra(ScanQRActivity.DETECTED_JSON_EXTRA)) {
+                val jsonText = data.getStringExtra(ScanQRActivity.DETECTED_JSON_EXTRA)
                 setJsonText(jsonText)
             }
         }

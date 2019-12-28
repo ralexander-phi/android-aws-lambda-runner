@@ -1,22 +1,16 @@
 package com.alexsci.android.lambdarunner.ui.add_key
 
 import android.app.Activity
-import android.app.AlertDialog
+import android.content.Intent
 import android.os.AsyncTask
-import android.os.Build
 import android.os.Bundle
 import android.text.Editable
-import android.text.Html
-import android.text.Html.FROM_HTML_MODE_COMPACT
 import android.text.TextWatcher
-import android.text.method.LinkMovementMethod
-import android.util.SparseArray
 import android.view.Menu
 import android.view.MenuItem
 import android.view.inputmethod.EditorInfo
 import android.widget.Button
 import android.widget.EditText
-import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
@@ -24,19 +18,19 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import arrow.core.Either
 import com.alexsci.android.lambdarunner.R
+import com.alexsci.android.lambdarunner.RequestCodes
 import com.alexsci.android.lambdarunner.aws.iam.IamClient
 import com.alexsci.android.lambdarunner.ui.common.ToolbarHelper
+import com.alexsci.android.lambdarunner.ui.scan_qr.ScanQRActivity
 import com.alexsci.android.lambdarunner.util.crypto.KeyManagement
 import com.alexsci.android.lambdarunner.util.preferences.PreferencesUtil
 import com.amazonaws.AmazonClientException
 import com.amazonaws.auth.BasicAWSCredentials
 import com.amazonaws.internal.StaticCredentialsProvider
-import com.google.android.gms.vision.barcode.Barcode
-import info.androidhive.barcode.BarcodeReader
 
 data class SaveKeyTaskParams(val accessKey: String, val secretKey: String)
 
-class AddKeyActivity: AppCompatActivity(), BarcodeReader.BarcodeReaderListener {
+class AddKeyActivity: AppCompatActivity() {
 
     companion object {
         const val LOG_TAG = "AddKeyActivity"
@@ -47,7 +41,6 @@ class AddKeyActivity: AppCompatActivity(), BarcodeReader.BarcodeReaderListener {
     private lateinit var secretAccessKeyEditText: EditText
 
     private lateinit var preferencesUtil: PreferencesUtil
-    private lateinit var barcodeReader: BarcodeReader
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -135,11 +128,14 @@ class AddKeyActivity: AppCompatActivity(), BarcodeReader.BarcodeReaderListener {
             }
 
             scanQrButton.setOnClickListener {
-                showQRCodeHint()
+                val intent = Intent(this@AddKeyActivity, ScanQRActivity::class.java)
+                intent.putExtra(
+                    ScanQRActivity.SCAN_REQUIREMENTS_EXTRA,
+                    ScanQRActivity.ScanRequirements.IS_AWS_CREDS.name
+                )
+                startActivityForResult(intent, RequestCodes.REQUEST_CODE_SCAN_QR.code)
             }
         }
-
-        barcodeReader = supportFragmentManager.findFragmentById(R.id.barcode_fragment) as BarcodeReader
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -156,23 +152,28 @@ class AddKeyActivity: AppCompatActivity(), BarcodeReader.BarcodeReaderListener {
         }
     }
 
-    private fun showQRCodeHint() {
-        val builder = AlertDialog.Builder(this)
-        val view = layoutInflater.inflate(R.layout.qr_code_help_view, null)
-        view.findViewById<TextView>(R.id.help_text).also {
-            it.text = Html.fromHtml(resources.getString(R.string.qr_code_help))
-            it.movementMethod = LinkMovementMethod.getInstance()
-        }
-        builder.setView(view)
-        builder.setMessage("Load credentials via QR code")
-        builder.setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
-        builder.create().show()
-    }
-
     private fun showLoginFailed(@StringRes errorString: Int) {
         Toast.makeText(applicationContext, errorString, Toast.LENGTH_SHORT).show()
     }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == RequestCodes.REQUEST_CODE_SCAN_QR.code &&
+            resultCode == Activity.RESULT_OK &&
+            data != null) {
+            val ak = data.getStringExtra(ScanQRActivity.DETECTED_ACCESS_KEY_ID)
+            val sec = data.getStringExtra(ScanQRActivity.DETECTED_SECRET_ACCESS_KEY)
+
+            assert(ak != null)
+            assert(sec != null)
+
+            runOnUiThread {
+                accessKeyIdEditText.setText(ak)
+                secretAccessKeyEditText.setText(sec)
+            }
+        }
+    }
     inner class SaveKeyTask: AsyncTask<SaveKeyTaskParams, Void, Either<AmazonClientException, String>>() {
         override fun doInBackground(vararg params: SaveKeyTaskParams?): Either<AmazonClientException, String> {
             assert(params.size == 1)
@@ -214,35 +215,6 @@ class AddKeyActivity: AppCompatActivity(), BarcodeReader.BarcodeReaderListener {
                 }
             }
         }
-    }
-
-    override fun onBitmapScanned(sparseArray: SparseArray<Barcode>?) {}
-    override fun onScannedMultiple(barcodes: MutableList<Barcode>?) {}
-
-    override fun onScanned(barcode: Barcode?) {
-        val scannedText = barcode?.rawValue
-        if (scannedText != null && scannedText.contains("\n")) {
-            val parts = scannedText.split("\n")
-            if (parts.size >= 2) {
-                runOnUiThread {
-                    accessKeyIdEditText.setText(parts[0])
-                    secretAccessKeyEditText.setText(parts[1])
-                }
-                return
-            }
-        }
-
-        runOnUiThread {
-            showQRCodeHint()
-        }
-    }
-
-    override fun onCameraPermissionDenied() {
-        Toast.makeText(applicationContext, "Camera permission was not granted", Toast.LENGTH_SHORT).show()
-    }
-
-    override fun onScanError(errorMessage: String?) {
-        Toast.makeText(applicationContext, errorMessage, Toast.LENGTH_SHORT).show()
     }
 }
 
