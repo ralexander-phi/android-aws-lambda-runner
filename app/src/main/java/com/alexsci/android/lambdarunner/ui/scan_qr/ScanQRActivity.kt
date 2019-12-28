@@ -35,7 +35,7 @@ class ScanQRActivity: AppCompatActivity(), BarcodeReader.BarcodeReaderListener {
         setContentView(R.layout.activity_scan_qr)
         setSupportActionBar(findViewById(R.id.toolbar))
 
-        scanRequirements = ScanRequirements.valueOf(intent.getStringExtra( SCAN_REQUIREMENTS_EXTRA))
+        scanRequirements = ScanRequirements.valueOf(intent.getStringExtra( SCAN_REQUIREMENTS_EXTRA)!!)
 
         when (scanRequirements) {
             ScanRequirements.IS_JSON -> supportActionBar?.title = "Scan JSON QR Code"
@@ -60,7 +60,7 @@ class ScanQRActivity: AppCompatActivity(), BarcodeReader.BarcodeReaderListener {
                         val sec = parts[1]
                         // https://docs.aws.amazon.com/IAM/latest/APIReference/API_AccessKey.html
                         // Guess generously for Secret Key
-                        if (ak.length >= 16 && ak.length <= 128 && sec.length > 5) {
+                        if (ak.length in 16..128 && sec.length > 5) {
                             // Success! Send the credentials back
                             val intent = Intent()
                             intent.putExtra(DETECTED_ACCESS_KEY_ID, ak)

@@ -142,14 +142,14 @@ class RunLambdaActivity: AppCompatActivity() {
 
         if (requestCode == RequestCodes.REQUEST_CODE_EDIT_JSON.code && resultCode == Activity.RESULT_OK) {
             if (data != null && data.hasExtra(EditJsonActivity.JSON_EXTRA)) {
-                val jsonText = data.getStringExtra(EditJsonActivity.JSON_EXTRA)
+                val jsonText = data.getStringExtra(EditJsonActivity.JSON_EXTRA)!!
                 setJsonText(jsonText)
             }
         }
 
         if (requestCode == RequestCodes.REQUEST_CODE_SCAN_QR.code && resultCode == Activity.RESULT_OK) {
             if (data != null && data.hasExtra(ScanQRActivity.DETECTED_JSON_EXTRA)) {
-                val jsonText = data.getStringExtra(ScanQRActivity.DETECTED_JSON_EXTRA)
+                val jsonText = data.getStringExtra(ScanQRActivity.DETECTED_JSON_EXTRA)!!
                 setJsonText(jsonText)
             }
         }
