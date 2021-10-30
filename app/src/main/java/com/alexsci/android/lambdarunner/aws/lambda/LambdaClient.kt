@@ -18,6 +18,7 @@ import com.amazonaws.internal.StaticCredentialsProvider
 import com.amazonaws.regions.Region
 import com.google.gson.JsonParser
 import java.net.URI
+import kotlin.reflect.KFunction2
 
 class LambdaClient(
     _credProvider: AWSCredentialsProvider,
@@ -34,10 +35,32 @@ class LambdaClient(
         return URI.create("https://" + region.getServiceEndpoint("lambda") + path)
     }
 
+    private fun <A, B> withRetry(
+        f: KFunction2<LambdaClient, A, Either<AmazonClientException, B>>,
+        a: A,
+        maxRetries: Int = 5
+    ) : Either<AmazonClientException, B> {
+        var tries = 0
+        while (true) {
+            tries += 1
+            when (val result = f(this, a)) {
+                is Either.Right -> return result
+                is Either.Left -> {
+                    if (result.a.isRetryable && tries < maxRetries) {
+                        Thread.sleep(1009)
+                        // Loop again
+                    } else {
+                        return result
+                    }
+                }
+            }
+        }
+    }
+
     /*
       See: https://docs.aws.amazon.com/lambda/latest/dg/API_ListFunctions.html
      */
-    fun list(listRequest: ListFunctionsRequest): Either<AmazonClientException, ListFunctionsResult> {
+    private fun privateList(listRequest: ListFunctionsRequest): Either<AmazonClientException, ListFunctionsResult> {
         try {
             val request = DefaultRequest<Void>("lambda")
             request.httpMethod = HttpMethodName.GET
@@ -63,7 +86,11 @@ class LambdaClient(
         }
     }
 
-    fun invoke(invokeRequest: InvokeFunctionRequest) : Either<AmazonClientException, InvokeFunctionResult> {
+    fun list(listRequest: ListFunctionsRequest): Either<AmazonClientException, ListFunctionsResult> {
+        return withRetry(LambdaClient::privateList, listRequest)
+    }
+
+    fun privateInvoke(invokeRequest: InvokeFunctionRequest) : Either<AmazonClientException, InvokeFunctionResult> {
         try {
             val request = DefaultRequest<Void>("lambda")
             request.httpMethod = HttpMethodName.POST
@@ -95,6 +122,10 @@ class LambdaClient(
         } catch (e: AmazonClientException) {
             return Either.left(e)
         }
+    }
+
+    fun invoke(invokeRequest: InvokeFunctionRequest) : Either<AmazonClientException, InvokeFunctionResult> {
+        return withRetry(LambdaClient::privateInvoke, invokeRequest)
     }
 }
 
