@@ -21,7 +21,7 @@ class DialogHelper {
             context,
             "Submit feedback",
             "Open Github",
-            "https://github.com/ralexander-phi/AWS-Lambda-Invoker-Issues/issues/new?assignees=ralexander-phi&labels=&template=feedback.md&title="
+            "https://github.com/ralexander-phi/android-aws-lambda-runner/issues/new?assignees=ralexander-phi"
         )
     }
 
