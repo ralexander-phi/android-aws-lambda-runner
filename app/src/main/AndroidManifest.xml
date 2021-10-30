@@ -33,7 +33,7 @@
         <activity
             android:name=".ui.list_keys.ListKeysActivity"
             android:label="AWS Lambda Invoker"
-            >
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -44,36 +44,41 @@
             android:name=".ui.add_key.AddKeyActivity"
             android:label="Add AWS Credential"
             android:parentActivityName=".ui.list_keys.ListKeysActivity"
+            android:exported="false"
             />
 
         <activity
             android:name=".ui.list_functions.ListFunctionsActivity"
             android:parentActivityName=".ui.list_keys.ListKeysActivity"
             android:label="Select a Function"
+            android:exported="false"
             />
 
         <activity
             android:name=".ui.run_lambda.RunLambdaActivity"
             android:parentActivityName=".ui.list_functions.ListFunctionsActivity"
             android:windowSoftInputMode="adjustResize"
-            >
-        </activity>
+            android:exported="false"
+            />
 
         <activity
             android:name=".ui.edit_json.EditJsonActivity"
             android:label="Edit JSON"
-            android:parentActivityName=".ui.list_functions.ListFunctionsActivity">
-        </activity>
+            android:parentActivityName=".ui.list_functions.ListFunctionsActivity"
+            android:exported="false"
+            />
 
         <activity
             android:name=".ui.scan_qr.ScanQRActivity"
-            android:label="Scan QR Code">
-        </activity>
+            android:label="Scan QR Code"
+            android:exported="false"
+            />
 
         <activity
             android:name=".ui.view_results.ViewResultsActivity"
             android:label="View Result"
             android:parentActivityName=".ui.run_lambda.RunLambdaActivity"
+            android:exported="false"
             />
 
         <provider
